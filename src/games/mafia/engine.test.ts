@@ -62,13 +62,14 @@ describe('mafia engine', () => {
     s = run(s, detective.id, { type: 'CHECK', target: m1!.id });
     s = run(s, doctor.id, { type: 'SAVE', target: victim.id });
     expect(s.phase).toBe('dawn');
-    expect(s.dawn).toEqual({ killed: null });
+    expect(s.dawn).toEqual({ killed: [], blocked: true });
     expect(s.checks[0]).toMatchObject({ target: m1!.id, mafia: true });
     // The investigation result is for the detective only.
     expect(game.view(s, { kind: 'player', seatId: victim.id }, ctx()).checks).toHaveLength(0);
     expect(game.view(s, { kind: 'player', seatId: detective.id }, ctx()).checks).toHaveLength(1);
     // The doctor can't protect the same person two nights running.
-    s = run(s, 'a', { type: 'CONTINUE' });
+    s = run(s, 'a', { type: 'CONTINUE' }); // dawn → discussion
+    s = run(s, 'a', { type: 'OPEN_VOTE' });
     s = run(s, 'a', { type: 'CLOSE' });
     s = run(s, 'a', { type: 'CONTINUE' });
     expect(game.transition(s, doctor.id, { type: 'SAVE', target: victim.id }, ctx())).toEqual({ error: 'NOT_TWICE' });
@@ -83,10 +84,12 @@ describe('mafia engine', () => {
     s = run(s, 'a', { type: 'CLOSE' });
     expect(s.players.find((p) => p.id === town[0]!.id)!.alive).toBe(false);
     s = run(s, 'a', { type: 'CONTINUE' });
+    expect(game.transition(s, town[1]!.id, { type: 'VOTE', target: town[2]!.id }, ctx())).toEqual({ error: 'VOTE_LOCKED' });
+    s = run(s, 'a', { type: 'OPEN_VOTE' });
     // Day: everyone alive votes out a town member → 7 alive, needs 4.
     for (const p of s.players.filter((p) => p.alive)) if (p.id !== town[1]!.id) s = run(s, p.id, { type: 'VOTE', target: town[1]!.id });
     s = run(s, town[1]!.id, { type: 'VOTE', target: 'skip' });
-    expect(s.verdict).toEqual({ eliminated: town[1]!.id });
+    expect(s.verdict).toEqual({ eliminated: town[1]!.id, spared: null });
     expect(s.winner).toBeNull();
   });
 
@@ -101,5 +104,73 @@ describe('mafia engine', () => {
     const s = game.setup(game.defaultSettings, withNarrator, content, ctx());
     expect(s.players).toHaveLength(6);
     expect(game.view(s, { kind: 'player', seatId: 'n' }, ctx()).players.every((p) => p.role)).toBe(true);
+  });
+
+  it('the witch sees the victim, can save them, and the potion is spent', () => {
+    const settings = { ...game.defaultSettings, doctor: false, detective: false, witch: true };
+    let s = game.setup(settings, seats, content, ctx());
+    for (const p of s.players) s = run(s, p.id, { type: 'READY' });
+    const witch = byRole(s, 'witch')[0]!;
+    const victim = s.players.find((p) => p.role === 'villager')!;
+    for (const m of byRole(s, 'mafia')) s = run(s, m.id, { type: 'KILL', target: victim.id });
+    expect(s.nightStep).toBe('witch');
+    expect(game.view(s, { kind: 'player', seatId: witch.id }, ctx()).night!.victim).toBe(victim.id);
+    expect(game.view(s, { kind: 'player', seatId: victim.id }, ctx()).night!.victim).toBeNull();
+    s = run(s, witch.id, { type: 'WITCH', heal: true, poison: null });
+    expect(s.dawn).toEqual({ killed: [], blocked: true });
+    expect(s.potions.heal).toBe(false);
+  });
+
+  it('lovers die together, and a dead hunter must shoot before the story moves on', () => {
+    const settings = { ...game.defaultSettings, doctor: false, detective: false, cupid: true, hunter: true };
+    let s = game.setup(settings, seats, content, ctx());
+    for (const p of s.players) s = run(s, p.id, { type: 'READY' });
+    const cupid = byRole(s, 'cupid')[0]!;
+    const hunter = byRole(s, 'hunter')[0]!;
+    const villager = byRole(s, 'villager')[0]!;
+    s = run(s, cupid.id, { type: 'CUPID', targets: [hunter.id, villager.id] });
+    for (const m of byRole(s, 'mafia')) s = run(s, m.id, { type: 'KILL', target: villager.id });
+    expect(s.dawn!.killed.sort()).toEqual([villager.id, hunter.id].sort());
+    expect(game.transition(s, 'a', { type: 'CONTINUE' }, ctx())).toEqual({ error: 'HUNTER_FIRST' });
+    const target = byRole(s, 'mafia')[0]!;
+    s = run(s, hunter.id, { type: 'SHOOT', target: target.id });
+    expect(s.players.find((p) => p.id === target.id)!.alive).toBe(false);
+  });
+
+  it('the idiot survives the first vote and loses their vote', () => {
+    const settings = { ...game.defaultSettings, doctor: false, detective: false, idiot: true };
+    let s = game.setup(settings, seats, content, ctx());
+    for (const p of s.players) s = run(s, p.id, { type: 'READY' });
+    s = run(s, 'a', { type: 'CLOSE' });
+    s = run(s, 'a', { type: 'CONTINUE' });
+    s = run(s, 'a', { type: 'OPEN_VOTE' });
+    const idiot = byRole(s, 'idiot')[0]!;
+    for (const p of s.players.filter((p) => p.alive && p.id !== idiot.id)) s = run(s, p.id, { type: 'VOTE', target: idiot.id });
+    s = run(s, 'a', { type: 'CLOSE' });
+    expect(s.verdict).toEqual({ eliminated: null, spared: idiot.id });
+    expect(s.players.find((p) => p.id === idiot.id)!.alive).toBe(true);
+  });
+
+  it('the host can pause, extend and resume the clock', () => {
+    const settings = { ...game.defaultSettings, nightSeconds: 60 };
+    let s = game.setup(settings, seats, content, ctx());
+    for (const p of s.players) s = run(s, p.id, { type: 'READY' });
+    expect(s.deadline).toBe(60_000);
+    s = game.transition(s, 'a', { type: 'PAUSE' }, ctx(20_000)) as State;
+    expect(s.paused).toEqual({ left: 40_000 });
+    expect(game.nextDeadline!(s)).toBeNull();
+    s = run(s, 'a', { type: 'EXTEND' });
+    s = game.transition(s, 'a', { type: 'RESUME' }, ctx(100_000)) as State;
+    expect(s.deadline).toBe(170_000);
+  });
+
+  it('each card gets one of the uploaded pictures for its role, and only its viewers see it', () => {
+    const pic = (key: string) => ({ key, widths: [320], thumb: '', aspect: 0.7 });
+    const art = { mafia: [pic('m1'), pic('m2')], villager: [pic('v1')] };
+    const s = game.setup(game.defaultSettings, seats, { ...content, roleArt: art }, ctx());
+    for (const p of byRole(s, 'mafia')) expect(['m1', 'm2']).toContain(p.art!.key);
+    const villager = byRole(s, 'villager')[0]!;
+    const v = game.view(s, { kind: 'player', seatId: villager.id }, ctx());
+    expect(JSON.stringify(v)).not.toMatch(/"m[12]"/);
   });
 });

@@ -77,8 +77,8 @@ export async function loadContent(env: Env, gameId: string): Promise<GameContent
   const words = customWords.length >= 36 && !useDefaults ? customWords : [...customWords, ...(defaultWords as string[])];
   const questions = [...of<KalakQuestion>('question'), ...(useDefaults || !of('question').length ? defaultQuestions : [])];
   const puzzles = [...of<Puzzle>('puzzle'), ...(useDefaults || !of('puzzle').length ? defaultPuzzles : [])];
-  const roleArt: Record<string, AssetRef> = {};
-  for (const r of of<{ role: string; asset: AssetRef }>('roleArt')) roleArt[r.role] = r.asset;
+  const roleArt: Record<string, AssetRef[]> = {};
+  for (const r of of<{ role: string; asset: AssetRef }>('roleArt')) (roleArt[r.role] ??= []).push(r.asset);
 
   return {
     words,

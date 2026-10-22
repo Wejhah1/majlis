@@ -45,7 +45,7 @@ export const A = {
   addPhotos: ['ارفع صور', 'Upload photos'],
   photosCount: ['{n} صورة', '{n} photos'],
 
-  mafiaText: ['صورة كل عضو تطلع داخل إطار الدور. هنا تقدر ترفع رسمة خاصة لكل دور وظهر البطاقة.', 'Each friend’s photo appears inside the role frame. Here you can upload custom art for each role and the card back.'],
+  mafiaText: ['صورة كل عضو تطلع داخل إطار الدور. تقدر ترفع أكثر من رسمة لكل دور، وكل بطاقة تاخذ وحدة منها عشوائياً.', 'Each friend’s photo appears inside the role frame. Upload as many pictures per role as you like; each card picks one at random.'],
   roleArt: ['رسمة الدور', 'Role art'],
   cardBack: ['ظهر البطاقة', 'Card back'],
   upload: ['ارفع', 'Upload'],

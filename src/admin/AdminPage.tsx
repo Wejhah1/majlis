@@ -373,20 +373,29 @@ function MafiaSection({ data, reload }: SectionProps) {
     <Section title={tr(A.tabMafia)} text={tr(A.mafiaText)}>
       <ul className="role-art" role="list">
         {ROLE_ORDER.map((role) => {
-          const row = art.filter((r) => r.data.role === role).at(-1);
+          // Several pictures per role: each dealt card picks one of them at random.
+          const rows = art.filter((r) => r.data.role === role);
           return (
             <li key={role} className="role-art__item">
-              <div className="role-art__card">{row ? <MediaImage asset={row.data.asset} alt="" sizes="200px" /> : <span className="role-art__empty">{pick(ROLES[role].name)}</span>}</div>
-              <p className="role-art__name">{pick(ROLES[role].name)}</p>
-              <PhotoPicker
-                aspect={5 / 7}
-                label={row ? tr(A.replace) : tr(A.upload)}
-                onUploaded={async (ref) => {
-                  for (const old of art.filter((r) => r.data.role === role)) await api.deleteContent(old.id);
-                  await api.addContent('mafia', 'roleArt', { role, asset: ref });
-                  reload();
-                }}
-              />
+              <div className="role-art__card">
+                {rows.length ? <MediaImage asset={rows.at(-1)!.data.asset} alt="" sizes="200px" /> : <span className="role-art__empty">{pick(ROLES[role].name)}</span>}
+              </div>
+              <p className="role-art__name">
+                {pick(ROLES[role].name)} {rows.length > 0 && <span className="faint">· {rows.length}</span>}
+              </p>
+              {rows.length > 0 && (
+                <ul className="role-art__thumbs" role="list">
+                  {rows.map((r) => (
+                    <li key={r.id}>
+                      <MediaImage asset={r.data.asset as AssetRef} alt="" sizes="80px" />
+                      <button type="button" className="asset-grid__remove" aria-label={tr(A.delete)} onClick={() => void api.deleteContent(r.id).then(reload)}>
+                        <TrashIcon />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <PhotoPicker aspect={5 / 7} label={tr(A.upload)} onUploaded={(ref) => api.addContent('mafia', 'roleArt', { role, asset: ref }).then(reload)} />
             </li>
           );
         })}

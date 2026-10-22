@@ -44,6 +44,17 @@ const SOUNDS = {
   },
   flip: () => tone(880, 0, 0.08, 'triangle', 0.08),
   reveal: () => [392, 523].forEach((f, i) => tone(f, i * 0.12, 0.4, 'sine')),
+  dusk: () => [392, 330, 262, 196].forEach((f, i) => tone(f, i * 0.22, 0.7, 'sine', 0.12)),
+  dawn: () => [262, 330, 392, 523].forEach((f, i) => tone(f, i * 0.16, 0.6, 'triangle', 0.12)),
+  strike: () => {
+    tone(90, 0, 0.5, 'sawtooth', 0.12);
+    tone(60, 0.05, 0.7, 'sine', 0.2);
+  },
+  shield: () => [659, 988, 1319].forEach((f, i) => tone(f, i * 0.07, 0.6, 'sine', 0.1)),
+  gavel: () => {
+    tone(140, 0, 0.12, 'square', 0.12);
+    tone(140, 0.25, 0.12, 'square', 0.12);
+  },
 };
 
 export function play(name: keyof typeof SOUNDS) {

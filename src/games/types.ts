@@ -37,7 +37,8 @@ export type GameContent = {
   agentPhotos: AssetRef[];
   questions: KalakQuestion[];
   puzzles: Puzzle[];
-  roleArt: Record<string, AssetRef>;
+  /** Several pictures per role; each dealt card picks one at random. */
+  roleArt: Record<string, AssetRef[]>;
   cardBack: AssetRef | null;
 };
 
