@@ -274,6 +274,8 @@
 /* ---------- Footer ---------- */
 
 .home__footer {
+  display: flex;
+  gap: 1.5rem;
   padding: 1rem var(--gutter) 1.5rem;
   font-size: var(--step--1);
 }
