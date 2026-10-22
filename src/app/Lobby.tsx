@@ -329,13 +329,13 @@ function MemberRow({
     <li className={`member${isMe ? ' member--me' : ''}${m.online ? '' : ' member--offline'}`}>
       <Avatar name={m.name} portrait={m.portrait} size={40} />
       <span className="member__text">
-        <span className="member__name">
-          {m.name}
+        <span className="member__name">{m.name}</span>
+        <span className="member__role">
+          {role && roleChoices.length < 2 && pick(role.name)}
+          {!m.online && ` · ${t('lobby.offline')}`}
           {isMe && <span className="tag">{t('lobby.you')}</span>}
           {m.id === room.adminId && <span className="tag tag--brass">{t('lobby.admin')}</span>}
         </span>
-        {role && roleChoices.length < 2 && <span className="member__role">{pick(role.name)}</span>}
-        {!m.online && <span className="member__role">{t('lobby.offline')}</span>}
       </span>
       {roleChoices.length > 1 && (
         <span className="segmented member__roles" role="group" aria-label={t('lobby.role')}>

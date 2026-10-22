@@ -7,7 +7,7 @@ import { decode, prepare, processFile, upload, type CropRect } from './images';
 import { A } from './strings';
 
 // LRI…PDI keeps "35 KB" in order inside Arabic sentences.
-const kb = (n: number) => `2066${Math.max(1, Math.round(n / 1024))} KB2069`;
+const kb = (n: number) => `⁦${Math.max(1, Math.round(n / 1024))} KB⁩`;
 
 /**
  * "Choose photo" button. One file opens a cropper locked to the slot's aspect; several files
