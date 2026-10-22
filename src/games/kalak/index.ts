@@ -225,6 +225,19 @@ export const game: GameModule<State, View, Settings> = {
     }
   },
   view: (s, viewer) => view(s, viewer),
+  bot(v, _id, rng) {
+    if (!v.me) return null;
+    if (v.phase === 'write' && !v.myFake) {
+      const lies = ['البطريق', 'سبعة', 'البرازيل', 'الملح', 'القهوة', 'المريخ', 'كوريا', 'خمسين', 'الحمام الزاجل', 'التمر', 'الفيل', 'اليابان'];
+      return { type: 'FAKE', text: lies[Math.floor(rng() * lies.length)]! };
+    }
+    if (v.phase === 'vote' && !v.myVote) {
+      const options = v.options.filter((o) => !o.mine);
+      return options.length ? { type: 'VOTE', option: options[Math.floor(rng() * options.length)]!.id } : null;
+    }
+    return null;
+  },
+  botDelay: (_v, rng) => 2500 + rng() * 5000,
   nextDeadline: (s) => (s.phase === 'write' || s.phase === 'vote' ? s.deadline : null),
   tick(state, ctx) {
     if (state.deadline === null || ctx.now < state.deadline) return state;

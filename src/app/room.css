@@ -411,3 +411,13 @@
 .stage__loading {
   padding: 2rem var(--gutter);
 }
+
+.bot-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1px dashed var(--line);
+}

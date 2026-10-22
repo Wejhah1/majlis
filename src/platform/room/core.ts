@@ -32,6 +32,8 @@ export type Member = {
   portrait: AssetRef | null;
   rosterId: string | null;
   joinedAt: number;
+  /** Test bot run by the room itself (only when the BOTS flag is on). */
+  bot?: boolean;
 };
 
 export type MatchRecord = { id: string; version: number; state: unknown; seatIds: string[]; startedAt: number };
@@ -185,9 +187,13 @@ export type LobbyAction =
   | { type: 'RENAME'; name: string }
   | { type: 'SETTINGS'; settings: unknown }
   | { type: 'SWITCH_GAME'; gameId: string }
+  | { type: 'ADD_BOT' | 'REMOVE_BOTS' }
   | { type: 'LEAVE' };
 
-const ADMIN_ONLY = new Set(['LOCK', 'APPROVE', 'REJECT', 'KICK', 'PROMOTE', 'SETTINGS', 'SWITCH_GAME']);
+const ADMIN_ONLY = new Set(['LOCK', 'APPROVE', 'REJECT', 'KICK', 'PROMOTE', 'SETTINGS', 'SWITCH_GAME', 'ADD_BOT', 'REMOVE_BOTS']);
+
+export const BOT_NAMES = ['نورة', 'فهد', 'سارة', 'خالد', 'ريم', 'تركي', 'هيا', 'سلمان', 'دانة', 'عبدالله', 'لولوة', 'ناصر'];
+const humans = (room: Room) => admitted(room).filter((m) => !m.bot);
 
 export function lobbyAction(
   room: Room,
@@ -195,6 +201,7 @@ export function lobbyAction(
   action: Record<string, unknown>,
   games: Record<string, GameModule>,
   now: number,
+  opts: { bots?: boolean } = {},
 ): Room {
   const s = structuredClone(room);
   const actor = s.members.find((m) => m.id === actorId);
@@ -204,7 +211,9 @@ export function lobbyAction(
 
   if (action.type === 'LEAVE') {
     s.members = s.members.filter((m) => m.id !== actorId);
-    if (isAdmin) s.adminId = admitted(s)[0]?.id ?? null;
+    if (isAdmin) s.adminId = humans(s)[0]?.id ?? null;
+    // Bots never keep a room alive on their own.
+    if (!humans(s).length) s.adminId = null;
     // Closing the last admitted seat removes pending members too; nobody can claim admin later.
     if (!s.adminId) s.members = [];
     touch(s, now);
@@ -277,6 +286,20 @@ export function lobbyAction(
       s.settings = parsed as Record<string, unknown>;
       break;
     }
+    case 'ADD_BOT': {
+      need(opts.bots, 'BOTS_DISABLED', 403);
+      need(s.phase === 'lobby', 'LOBBY_ONLY', 409);
+      need(admitted(s).length < MAX_MEMBERS, 'ROOM_FULL', 409);
+      const name = BOT_NAMES.find((n) => !s.members.some((m) => m.name === n)) ?? `بوت ${s.members.length + 1}`;
+      const bot: Member = { id: crypto.randomUUID(), name, tokenHash: 'bot:' + crypto.randomUUID(), status: 'admitted', team: null, role: null, portrait: null, rosterId: null, joinedAt: now, bot: true };
+      Object.assign(bot, defaultSeat(s, game.meta.lobby));
+      s.members.push(bot);
+      break;
+    }
+    case 'REMOVE_BOTS':
+      need(s.phase === 'lobby', 'LOBBY_ONLY', 409);
+      s.members = s.members.filter((m) => !m.bot);
+      break;
     case 'SWITCH_GAME': {
       need(s.phase === 'lobby', 'LOBBY_ONLY', 409);
       const next = games[String(action.gameId)];
@@ -311,7 +334,7 @@ export function recoverRoom(room: Room, online: string[], now: number): Room {
   const s = structuredClone(room);
   if (s.adminAway?.id !== s.adminId) s.adminAway = { id: s.adminId!, since: now };
   if (now - s.adminAway!.since >= ADMIN_GRACE) {
-    const next = admitted(s).find((m) => live.has(m.id));
+    const next = humans(s).find((m) => live.has(m.id));
     if (next) {
       s.adminId = next.id;
       s.adminAway = null;
@@ -329,6 +352,7 @@ export type PublicMember = {
   portrait: AssetRef | null;
   online: boolean;
   seated: boolean;
+  bot: boolean;
 };
 
 export type RoomView = {
@@ -345,6 +369,8 @@ export type RoomView = {
   settings: Record<string, unknown>;
   readiness: Readiness;
   match: { id: string; version: number; view: unknown } | null;
+  /** Whether the admin may add test bots (BOTS flag on the Worker). */
+  bots: boolean;
 };
 
 export function roomView(
@@ -353,6 +379,7 @@ export function roomView(
   online: string[],
   game: GameModule,
   now: number,
+  bots = false,
 ): RoomView {
   const live = new Set(online);
   const seated = new Set(room.match?.seatIds ?? []);
@@ -364,6 +391,7 @@ export function roomView(
     portrait: m.portrait,
     online: live.has(m.id),
     seated: seated.has(m.id),
+    bot: !!m.bot,
   });
   const me = viewerId ? room.members.find((m) => m.id === viewerId) ?? null : null;
   const base = {
@@ -374,6 +402,7 @@ export function roomView(
     adminId: room.adminId,
     adminAwayUntil: room.adminAway ? room.adminAway.since + ADMIN_GRACE : null,
     me: me ? safe(me) : null,
+    bots,
   };
   if (me?.status === 'pending') {
     return { ...base, phase: 'waiting', members: [], pending: [], settings: {}, readiness: { ready: false, error: 'WAITING' }, match: null };

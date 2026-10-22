@@ -93,6 +93,13 @@ export type GameModule<State = any, View = unknown, Settings extends Record<stri
   /** Next moment the room must wake up for a timer, if any. */
   nextDeadline?(state: State): number | null;
   tick?(state: State, ctx: Ctx): State;
+  /**
+   * Test bots: given the bot's own view (so it can't cheat), the next action to take, or null.
+   * Called again after every change; keep it to one step at a time.
+   */
+  bot?(view: View, seatId: string, rng: Rng): Record<string, unknown> | null;
+  /** How long a bot "thinks" before acting, in ms (default 900–2400). */
+  botDelay?(view: View, rng: Rng): number;
   /** Actions that may race harmlessly (e.g. marks) skip the stale-version check. */
   raceSafe?(action: unknown): boolean;
 };

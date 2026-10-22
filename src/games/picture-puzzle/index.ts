@@ -187,6 +187,18 @@ export const game: GameModule<State, View, Settings> = {
     }
   },
   view: (s, viewer) => view(s, viewer),
+  bot(v, _id, rng) {
+    if (v.phase === 'final') return null;
+    if (v.isHost) {
+      // A bot host lets you test as a player: it judges buzzes at random and moves on.
+      if (v.phase === 'answer') return { type: 'NEXT' };
+      if (v.buzz) return { type: rng() < 0.6 ? 'AWARD' : 'WRONG' };
+      return null;
+    }
+    if (v.phase !== 'show' || v.buzz || !v.myTeam || v.lockedOut.includes(v.myTeam)) return null;
+    return { type: 'BUZZ' };
+  },
+  botDelay: (v, rng) => (v.isHost ? 2500 + rng() * 1500 : 3000 + rng() * 6000),
   // Buzzes race on purpose: the first one in wins, so no stale-version rejections for them.
   raceSafe: (action) => isRecord(action) && action.type === 'BUZZ',
 };

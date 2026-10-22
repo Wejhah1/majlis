@@ -17,7 +17,7 @@ import {
   type Identity,
   type Room,
 } from '../src/platform/room/core';
-import { endMatch, matchCommand, matchDeadline, startMatch, tickMatch } from '../src/platform/room/match';
+import { endMatch, matchCommand, matchDeadline, secureRandom, startMatch, tickMatch } from '../src/platform/room/match';
 import { loadContent } from './db';
 import { errorResponse, noStore, readJSON, sessionHash } from './http';
 import type { AssetRef } from '../src/games/types';
@@ -49,6 +49,12 @@ export class RoomsServer extends Server<Env> {
   room: Room | null = null;
   work: Promise<unknown> = Promise.resolve();
   scheduledAlarm: number | null = null;
+  botTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  /** Test bots are on while the Worker has BOTS = "on" (wrangler.jsonc vars). */
+  botsEnabled() {
+    return (this.env as { BOTS?: string }).BOTS === 'on';
+  }
 
   exclusive<T>(fn: () => Promise<T>): Promise<T> {
     const operation = this.work.then(fn);
@@ -186,7 +192,8 @@ export class RoomsServer extends Server<Env> {
     const room = this.room;
     const game = this.game();
     const now = Date.now();
-    const online = this.online(now);
+    // Bots are always "online" for display, but never keep an empty room alive.
+    const online = [...this.online(now), ...(room?.members.filter((m) => m.bot).map((m) => m.id) ?? [])];
     for (const c of this.sockets()) {
       const s = c.state;
       if (!s || s.expired || (!s.memberId && !s.screen)) continue;
@@ -200,7 +207,45 @@ export class RoomsServer extends Server<Env> {
         c.close(4403, 'REMOVED');
         continue;
       }
-      this.send(c, { type: 'snapshot', serverNow: now, room: roomView(room, s.memberId ?? null, online, game, now) });
+      this.send(c, { type: 'snapshot', serverNow: now, room: roomView(room, s.memberId ?? null, online, game, now, this.botsEnabled()) });
+    }
+    this.driveBots();
+  }
+
+  /** Give every bot seat that has something to do a short "thinking" delay, then act. */
+  driveBots() {
+    const room = this.room;
+    const game = this.game();
+    if (!room?.match || !game?.bot) return;
+    const ctx = () => ({ now: Date.now(), adminId: this.room?.adminId ?? '' });
+    for (const id of room.match.seatIds) {
+      if (!room.members.find((m) => m.id === id)?.bot || this.botTimers.has(id)) continue;
+      const view = game.view(room.match.state, { kind: 'player', seatId: id }, ctx());
+      if (!game.bot(view, id, secureRandom)) continue;
+      const delay = game.botDelay?.(view, secureRandom) ?? 900 + secureRandom() * 1500;
+      const timer = setTimeout(
+        () =>
+          void this.exclusive(async () => {
+            this.botTimers.delete(id);
+            const r = this.room;
+            if (!r?.match || !r.match.seatIds.includes(id)) return;
+            // Decide again with the latest state: things may have moved on while it "thought".
+            const action = game.bot!(game.view(r.match.state, { kind: 'player', seatId: id }, ctx()), id, secureRandom);
+            if (action) {
+              try {
+                const next = matchCommand(r, id, { matchId: r.match.id, version: r.match.version, action }, game, Date.now());
+                await this.persist(next);
+                await this.advance();
+                await this.schedule();
+              } catch {
+                // A rejected bot move just gets retried on the next publish.
+              }
+            }
+            this.publish();
+          }),
+        delay,
+      );
+      this.botTimers.set(id, timer);
     }
   }
 
@@ -334,7 +379,7 @@ export class RoomsServer extends Server<Env> {
         else if (data.type === 'END_MATCH') next = endMatch(this.room, memberId, now);
         else if (data.type === 'GAME') next = matchCommand(this.room, memberId, data, game, now);
         else {
-          next = lobbyAction(this.room, memberId, data, serverGames, now);
+          next = lobbyAction(this.room, memberId, data, serverGames, now, { bots: this.botsEnabled() });
           if (next.adminId === null) next = { ...next, members: [] };
         }
         await this.persist(next);

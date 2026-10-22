@@ -568,5 +568,23 @@ export const game: GameModule<State, View, Settings> = {
     expire(s, ctx.now, ctx.rng);
     return s;
   },
+  bot(v, _id, rng) {
+    const me = v.me;
+    if (!me || v.paused || v.phase === 'finished') return null;
+    if (v.canDraw) return { type: 'DRAW' };
+    if (me.team !== v.active || v.phase === 'deal') return null;
+    const hidden = v.board.filter((c) => !c.revealed);
+    const pick = <T,>(list: T[]) => list[Math.floor(rng() * list.length)]!;
+    if (me.role === 'spy' && v.phase === 'clue') {
+      const onBoard = new Set(v.board.map((c) => normalizeWord(c.word ?? '')));
+      const clue = ['فكرة', 'لغز', 'سفر', 'ذكرى', 'ضوء', 'حلم', 'طريق', 'صوت'].find((w) => !onBoard.has(normalizeWord(w))) ?? 'سرّ';
+      return { type: 'CLUE', text: clue, count: 1 };
+    }
+    if (me.role === 'agent' && v.phase === 'second') return { type: 'DECLINE' };
+    if (me.role !== 'agent' || v.phase !== 'guess') return null;
+    if (v.guesses >= 1 && rng() < 0.35) return { type: 'END' };
+    const marked = hidden.find((c) => c.marks.some((m) => m.id === me.id));
+    return marked ? { type: 'GUESS', cell: marked.id } : hidden.length ? { type: 'MARK', cell: pick(hidden).id } : null;
+  },
   raceSafe: (action) => isRecord(action) && action.type === 'MARK',
 };

@@ -20,5 +20,7 @@
     ]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RoomsServer", "RateGuardServer"] }],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Test bots: the room admin can add bots to fill seats. Set to "off" (or delete) when done testing.
+  "vars": { "BOTS": "on" }
 }

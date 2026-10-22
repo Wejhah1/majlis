@@ -72,6 +72,20 @@ export function Lobby({ room, send }: { room: ClientRoom; send: Send }) {
 
           {isAdmin && <GameSwitcher current={game.id} onPick={(id) => quiet({ type: 'SWITCH_GAME', gameId: id })} />}
 
+          {isAdmin && room.bots && (
+            <div className="bot-bar">
+              <button type="button" className="button button--quiet" onClick={() => quiet({ type: 'ADD_BOT' })}>
+                {t('lobby.addBot')}
+              </button>
+              {room.members.some((m) => m.bot) && (
+                <button type="button" className="button button--ghost" onClick={() => quiet({ type: 'REMOVE_BOTS' })}>
+                  {t('lobby.removeBots')}
+                </button>
+              )}
+              <span className="faint">{t('lobby.botsHint')}</span>
+            </div>
+          )}
+
           {room.adminAwayUntil && <AdminAway until={room.adminAwayUntil} offset={room.clockOffset} />}
 
           <Seats game={game} room={room} isAdmin={isAdmin} onSeat={(m, team, role) => quiet({ type: 'SEAT', targetId: m.id, team, role })} onMenu={setMenuFor} />
@@ -334,6 +348,7 @@ function MemberRow({
           {role && roleChoices.length < 2 && pick(role.name)}
           {!m.online && ` · ${t('lobby.offline')}`}
           {isMe && <span className="tag">{t('lobby.you')}</span>}
+          {m.bot && <span className="tag">{t('lobby.bot')}</span>}
           {m.id === room.adminId && <span className="tag tag--brass">{t('lobby.admin')}</span>}
         </span>
       </span>

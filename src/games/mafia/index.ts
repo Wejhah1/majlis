@@ -328,6 +328,33 @@ export const game: GameModule<State, View, Settings> = {
     }
   },
   view,
+  bot(v, id, rng) {
+    const me = v.me;
+    if (!me || v.phase === 'over') return null;
+    const pick = <T,>(list: T[]) => (list.length ? list[Math.floor(rng() * list.length)]! : null);
+    const others = v.players.filter((p) => p.alive && p.id !== id);
+    if (v.phase === 'reveal') return v.players.find((p) => p.id === id)?.ready ? null : { type: 'READY' };
+    if (!me.alive) return null;
+    if (v.phase === 'night' && v.night) {
+      if (me.role === 'mafia' && !v.night.mafiaVotes[id]) {
+        const t = pick(others.filter((p) => p.role !== 'mafia'));
+        return t ? { type: 'KILL', target: t.id } : null;
+      }
+      if (me.role === 'doctor' && !v.night.mySave) {
+        const t = pick(v.players.filter((p) => p.alive && p.id !== v.night!.lastSave));
+        return t ? { type: 'SAVE', target: t.id } : null;
+      }
+      if (me.role === 'detective' && !v.night.myCheck) {
+        const t = pick(others);
+        return t ? { type: 'CHECK', target: t.id } : null;
+      }
+    }
+    if (v.phase === 'day' && !v.votes[id]) {
+      const t = rng() < 0.25 ? null : pick(others);
+      return { type: 'VOTE', target: t ? t.id : 'skip' };
+    }
+    return null;
+  },
   nextDeadline: (s) => (s.phase === 'night' || s.phase === 'day' ? s.deadline : null),
   tick(state, ctx) {
     if (state.deadline === null || ctx.now < state.deadline) return state;
