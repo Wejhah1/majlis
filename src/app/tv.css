@@ -1,0 +1,123 @@
+/* The TV is read from across a room: everything is bigger and the chrome disappears. */
+html.is-tv {
+  font-size: clamp(16px, 1.15vw, 28px);
+}
+
+.tv {
+  min-block-size: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tv--center {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.tv__title {
+  font-size: var(--step-2);
+}
+
+.tv-code {
+  display: grid;
+  gap: 1rem;
+  inline-size: min(100%, 26rem);
+}
+
+.tv-lobby {
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(2rem, 6vw, 7rem);
+  padding: clamp(1.5rem, 4vw, 4rem);
+}
+
+.tv-lobby__join {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 2rem 2.25rem 1.75rem;
+  border-radius: 20px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  text-align: center;
+  box-shadow: 0 40px 60px -30px oklch(0 0 0 / 0.8);
+  rotate: -1.5deg;
+}
+
+.tv-lobby__join .faint {
+  color: oklch(0.45 0.03 60);
+}
+
+.tv-lobby__game {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  line-height: 1;
+  margin-block-end: 0.5rem;
+}
+
+.tv-lobby__hint {
+  font-weight: 700;
+}
+
+.tv-lobby__code {
+  font-family: var(--font-latin);
+  font-size: var(--step-3);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.tv-lobby__people {
+  display: grid;
+  gap: 1.5rem;
+  align-content: center;
+}
+
+.tv-faces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 1.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tv-face {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  inline-size: 7rem;
+  font-weight: 600;
+  text-align: center;
+  animation: face-in 0.6s var(--spring) backwards;
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+.tv-face span {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes face-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+    translate: 0 20px;
+  }
+}
+
+.tv .stage__bar {
+  font-size: var(--step-0);
+}
+
+@media (max-width: 760px) {
+  .tv-lobby {
+    grid-template-columns: 1fr;
+  }
+}

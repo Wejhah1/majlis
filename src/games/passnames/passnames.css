@@ -1,0 +1,646 @@
+/* Passnames: a spy dossier. Paper cards, inked team colours, a stamped reveal. */
+.pn {
+  --gap: clamp(0.3rem, 0.9vw, 0.6rem);
+  --blue: var(--team-blue);
+  --red: var(--team-red);
+  --card-paper: oklch(0.93 0.03 85);
+  --card-ink: oklch(0.26 0.02 55);
+  display: grid;
+  gap: 0.9rem;
+  inline-size: min(100%, 64rem);
+  margin-inline: auto;
+  padding: 0.9rem var(--gutter) 2rem;
+}
+
+/* ---------- Scoreboard ---------- */
+
+.pn__scores {
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+
+.pn__score {
+  --c: var(--blue);
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem 0.75rem;
+  overflow: hidden;
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--c) 14%, var(--ink-1));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 30%, transparent);
+  transition: background 0.3s;
+}
+
+.pn__score--red {
+  --c: var(--red);
+}
+
+.pn__score[aria-current='true'] {
+  background: color-mix(in oklab, var(--c) 34%, var(--ink-1));
+  box-shadow: inset 0 0 0 2px var(--c);
+}
+
+.pn__score-name {
+  font-weight: 700;
+}
+
+.pn__score-num b {
+  font-family: var(--font-latin);
+  font-size: var(--step-2);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.pn__score-bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 4px;
+  background: linear-gradient(to var(--bar-dir, right), var(--c) calc(var(--p) * 100%), transparent 0);
+}
+
+[dir='rtl'] .pn__score-bar {
+  --bar-dir: left;
+}
+
+.pn__timer {
+  display: grid;
+  place-items: center;
+  min-inline-size: 3.5rem;
+  padding-inline: 0.6rem;
+  border-radius: 12px;
+  background: var(--ink-1);
+  font-family: var(--font-latin);
+  font-size: var(--step-1);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.pn__timer.is-urgent {
+  background: oklch(0.42 0.13 30);
+  animation: pn-pulse 1s ease-in-out infinite;
+}
+
+@keyframes pn-pulse {
+  50% {
+    scale: 1.06;
+  }
+}
+
+/* ---------- Clue / status ---------- */
+
+.pn__status {
+  min-block-size: 3.25rem;
+  display: grid;
+  place-items: center;
+}
+
+.pn__clue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem 0.9rem;
+}
+
+.pn__clue-word {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  line-height: 1;
+  color: var(--paper);
+}
+
+.pn__clue-count {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 2.4rem;
+  block-size: 2.4rem;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--card-ink);
+  font-family: var(--font-latin);
+  font-size: var(--step-1);
+  font-weight: 800;
+}
+
+.pn__clue-left {
+  color: var(--text-faint);
+  font-size: var(--step--1);
+}
+
+.pn__banner {
+  color: var(--text-dim);
+  font-size: var(--step-1);
+}
+
+.pn__winner {
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  color: var(--paper);
+  animation: pn-stamp 0.6s var(--spring);
+}
+
+.pn__winner--blue {
+  background: var(--blue);
+}
+
+.pn__winner--red {
+  background: var(--red);
+}
+
+.pn__mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--brass);
+}
+
+/* ---------- Board ---------- */
+
+.pn__board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--gap);
+  /* Fit the whole board on screen: 7:5 cards in a square grid → width = height × 1.4. */
+  inline-size: min(100%, calc((100dvh - 15rem) * 1.4));
+  margin-inline: auto;
+}
+
+.pn--screen .pn__board {
+  inline-size: min(100%, calc((100dvh - 13rem) * 1.4));
+}
+
+.pn--six .pn__board {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.pn-card {
+  position: relative;
+  aspect-ratio: 7 / 5;
+  perspective: 700px;
+  animation: pn-deal 0.5s var(--spring) backwards;
+  animation-delay: calc(var(--i) * 18ms);
+}
+
+.pn-card.has-picture {
+  aspect-ratio: 1;
+}
+
+@keyframes pn-deal {
+  from {
+    opacity: 0;
+    translate: 0 30px;
+    rotate: -4deg;
+  }
+}
+
+.pn-card__flip {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: clamp(5px, 0.8vw, 9px);
+  background: none;
+  color: inherit;
+  transform-style: preserve-3d;
+  transition: transform 0.7s var(--spring);
+}
+
+.pn-card__flip:disabled {
+  cursor: default;
+}
+
+.pn-card.is-revealed .pn-card__flip {
+  transform: rotateY(180deg);
+}
+
+.pn-card__front,
+.pn-card__back {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: inherit;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.pn-card__front {
+  background: var(--card-paper);
+  color: var(--card-ink);
+  box-shadow:
+    inset 0 0 0 1px oklch(0.24 0.02 55 / 0.18),
+    0 1px 0 oklch(1 0 0 / 0.4) inset,
+    0 3px 0 oklch(0.55 0.04 70 / 0.55),
+    0 8px 14px -8px oklch(0 0 0 / 0.7);
+  transition:
+    translate 0.2s var(--ease-out),
+    box-shadow 0.2s;
+}
+
+/* A thin typed rule under the word, like a label on a file folder. */
+.pn-card__front::after {
+  content: '';
+  position: absolute;
+  inset-inline: 14%;
+  inset-block-end: 22%;
+  block-size: 1px;
+  background: oklch(0.24 0.02 55 / 0.15);
+}
+
+.pn-card.has-picture .pn-card__front::after {
+  display: none;
+}
+
+.pn-card__flip:not(:disabled):hover .pn-card__front {
+  translate: 0 -2px;
+  box-shadow:
+    inset 0 0 0 1px oklch(0.24 0.02 55 / 0.18),
+    0 5px 0 oklch(0.55 0.04 70 / 0.55),
+    0 14px 18px -8px oklch(0 0 0 / 0.7);
+}
+
+.pn-card__word {
+  position: relative;
+  z-index: 1;
+  max-inline-size: 92%;
+  font-size: clamp(0.72rem, 0.45rem + 1.1vw, 1.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pn--six .pn-card__word {
+  font-size: clamp(0.66rem, 0.4rem + 0.95vw, 1.05rem);
+}
+
+.pn-card__photo {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.pn-card.has-picture .pn-card__word {
+  align-self: end;
+  margin-block-end: 6%;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  background: oklch(0.93 0.03 85 / 0.88);
+  font-size: clamp(0.6rem, 0.4rem + 0.6vw, 0.85rem);
+}
+
+/* Spymaster key: an inked edge and a faint wash on hidden cards. */
+.pn-card[data-key] .pn-card__front {
+  --k: var(--card-paper);
+  background: color-mix(in oklab, var(--k) 22%, var(--card-paper));
+  box-shadow:
+    inset 0 0 0 3px var(--k),
+    0 3px 0 oklch(0.55 0.04 70 / 0.55),
+    0 8px 14px -8px oklch(0 0 0 / 0.7);
+}
+
+.pn-card[data-key='blue'] .pn-card__front {
+  --k: var(--blue);
+}
+.pn-card[data-key='red'] .pn-card__front {
+  --k: var(--red);
+}
+.pn-card[data-key='neutral'] .pn-card__front {
+  --k: oklch(0.75 0.03 80);
+}
+.pn-card[data-key='yellow'] .pn-card__front {
+  --k: var(--brass);
+}
+.pn-card[data-key='black'] .pn-card__front {
+  --k: oklch(0.2 0.01 60);
+  color: var(--card-ink);
+}
+
+/* Revealed: the back face is the inked agent card. */
+.pn-card__back {
+  transform: rotateY(180deg);
+  background: var(--c, var(--card-paper));
+  color: oklch(0.97 0.01 80);
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.15);
+}
+
+.pn-card__back .pn-card__word {
+  opacity: 0.85;
+}
+
+.pn-card__back .pn-card__photo {
+  opacity: 0.35;
+  mix-blend-mode: luminosity;
+}
+
+.pn-card[data-color='blue'] .pn-card__back {
+  --c: var(--blue);
+}
+.pn-card[data-color='red'] .pn-card__back {
+  --c: var(--red);
+}
+.pn-card[data-color='neutral'] .pn-card__back {
+  --c: oklch(0.8 0.035 80);
+  color: var(--card-ink);
+  background-image: repeating-linear-gradient(135deg, transparent 0 7px, oklch(0.24 0.02 55 / 0.06) 7px 8px);
+}
+.pn-card[data-color='yellow'] .pn-card__back {
+  --c: var(--brass);
+  color: var(--card-ink);
+}
+.pn-card[data-color='black'] .pn-card__back {
+  --c: oklch(0.16 0.01 60);
+}
+
+/* Rubber stamp mark on revealed cards. */
+.pn-card__stamp {
+  position: absolute;
+  inset-block-start: 8%;
+  inset-inline-end: 7%;
+  inline-size: 28%;
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.45;
+  rotate: -12deg;
+}
+
+.pn-card[data-color='black'] .pn-card__stamp {
+  inset: auto;
+  inline-size: 60%;
+  border-color: var(--ember);
+  border-width: 3px;
+  opacity: 0.85;
+  rotate: -18deg;
+  background:
+    linear-gradient(45deg, transparent 46%, var(--ember) 46% 54%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, var(--ember) 46% 54%, transparent 54%);
+}
+
+.pn-card.is-selected .pn-card__front {
+  box-shadow:
+    inset 0 0 0 3px var(--brass),
+    0 0 0 3px oklch(0.8 0.13 78 / 0.35);
+}
+
+.pn-card.is-marked .pn-card__front {
+  box-shadow:
+    inset 0 0 0 2px oklch(0.8 0.13 78 / 0.9),
+    0 3px 0 oklch(0.55 0.04 70 / 0.55),
+    0 8px 14px -8px oklch(0 0 0 / 0.7);
+}
+
+.pn-card__marks {
+  position: absolute;
+  inset-block-start: -0.35rem;
+  inset-inline-start: -0.25rem;
+  z-index: 2;
+  display: flex;
+  pointer-events: none;
+}
+
+.pn-card__mark {
+  display: grid;
+  place-items: center;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin-inline-end: -0.35rem;
+  border-radius: 50%;
+  background: var(--brass);
+  color: var(--ink-0);
+  font-size: 0.68rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px var(--ink-0);
+  animation: pn-stamp 0.35s var(--spring);
+}
+
+.pn-card__reveal {
+  position: absolute;
+  inset-block-end: -0.45rem;
+  inset-inline: 12%;
+  z-index: 3;
+  padding: 0.2rem 0.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink-0);
+  color: var(--brass);
+  font-size: clamp(0.65rem, 0.5rem + 0.4vw, 0.8rem);
+  font-weight: 800;
+  box-shadow: 0 0 0 1.5px var(--brass);
+  animation: pn-stamp 0.35s var(--spring);
+}
+
+.pn-card__reveal:hover {
+  background: var(--brass);
+  color: var(--ink-0);
+}
+
+@keyframes pn-stamp {
+  from {
+    opacity: 0;
+    scale: 1.6;
+  }
+}
+
+/* ---------- Controls ---------- */
+
+.pn__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.pn__pause {
+  margin-inline-start: auto;
+}
+
+.pn-clue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  inline-size: min(100%, 40rem);
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: var(--ink-1);
+  box-shadow: inset 0 0 0 1px var(--brass-deep);
+}
+
+.pn-clue__text {
+  flex: 1 1 12rem;
+  font-size: var(--step-1);
+}
+
+.pn-clue__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.pn-clue__counts button {
+  inline-size: 2.4rem;
+  block-size: 2.4rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink-2);
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.pn-clue__counts button[aria-pressed='true'] {
+  background: var(--paper);
+  color: var(--card-ink);
+}
+
+.pn__second {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.pn__hand {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pn-action {
+  display: grid;
+  place-items: end center;
+  inline-size: 4.2rem;
+  aspect-ratio: 5 / 7;
+  padding: 0.35rem;
+  border: 0;
+  border-radius: 7px;
+  background:
+    var(--sadu) repeat-x top / 36px 12px,
+    var(--paper);
+  color: var(--card-ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow: 0 8px 14px -8px oklch(0 0 0 / 0.7);
+  transition:
+    translate 0.25s var(--spring),
+    rotate 0.25s var(--spring);
+}
+
+.pn-action:not(:disabled):hover,
+.pn-action[aria-pressed='true'] {
+  translate: 0 -6px;
+  rotate: -3deg;
+}
+
+.pn-action[aria-pressed='true'] {
+  box-shadow:
+    0 0 0 3px var(--brass),
+    0 12px 18px -8px oklch(0 0 0 / 0.7);
+}
+
+.pn-action:disabled {
+  opacity: 0.55;
+}
+
+.pn__scans {
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-dim);
+  font-size: var(--step--1);
+  text-align: center;
+}
+
+.pn__hint {
+  text-align: center;
+}
+
+.pn__log summary {
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: var(--step--1);
+}
+
+.pn__log ol {
+  display: grid;
+  gap: 0.3rem;
+  max-block-size: 14rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+.pn__log li[data-team='blue'] {
+  color: oklch(0.78 0.08 245);
+}
+
+.pn__log li[data-team='red'] {
+  color: oklch(0.78 0.1 28);
+}
+
+/* ---------- Shared TV board: fill the screen, no controls. ---------- */
+
+.pn--screen {
+  inline-size: min(100%, 120rem);
+  gap: 1.25rem;
+}
+
+.pn--screen .pn__log {
+  display: none;
+}
+
+.tv .pn--screen .pn-card__word {
+  font-size: clamp(1rem, 0.4rem + 1.5vw, 2.4rem);
+}
+
+@media (max-width: 560px) {
+  .pn {
+    --gap: 0.28rem;
+    padding-inline: 0.5rem;
+  }
+
+  .pn-card__word {
+    font-size: clamp(0.58rem, 0.3rem + 1.6vw, 0.85rem);
+  }
+
+  .pn--six .pn-card__word {
+    font-size: 0.55rem;
+  }
+
+  .pn-card {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pn-card.is-revealed .pn-card__flip {
+    transform: none;
+  }
+
+  .pn-card.is-revealed .pn-card__front {
+    visibility: hidden;
+  }
+
+  .pn-card.is-revealed .pn-card__back {
+    transform: none;
+  }
+}

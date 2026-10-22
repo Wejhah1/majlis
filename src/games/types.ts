@@ -1,26 +1,60 @@
-// The contract every game folder implements. Shared by the Worker (rules) and the
-// client (views live in each game's client.tsx so the Worker never imports React).
+// The contract every game folder implements. index.ts (rules) runs in the Worker; client.tsx
+// (views) runs in the browser. meta.ts is shared by both and holds nothing but data.
 
 export type Localized = { ar: string; en: string };
 
-/** Who is looking at the game: a seated player, the shared TV board, or the host's controller. */
-export type Viewer = { kind: 'player'; seatId: string } | { kind: 'screen' } | { kind: 'host'; seatId: string };
-
 export type Surface = 'phone' | 'screen' | 'host';
 
-export type Seat = { id: string; name: string; memberId?: string };
+/** A seated member as a game sees it. Team and role come from the lobby. */
+export type Seat = {
+  id: string;
+  name: string;
+  team: string | null;
+  role: string | null;
+  portrait: AssetRef | null;
+};
 
-/** Randomness and time are always passed in, so engines stay pure and testable with a seeded rng. */
+/** Who is looking: a seated player, or the shared TV board (public information only). */
+export type Viewer = { kind: 'player'; seatId: string } | { kind: 'screen' };
+
 export type Rng = () => number;
 
-/** What the admin dashboard lets a group upload for this game. */
-export type AssetSlot = {
+/** Randomness and time are always passed in, so engines stay pure and testable with a seeded rng. */
+export type Ctx = { rng: Rng; now: number; adminId: string };
+
+/** An uploaded, pre-optimised image. Served at /media/{key}-{width}.webp. */
+export type AssetRef = { key: string; widths: number[]; thumb: string; aspect: number };
+
+export type KalakQuestion = { id: string; prompt: string; answer: string; category: string; image?: AssetRef | null };
+export type PuzzleTile = { kind: 'image'; asset: AssetRef } | { kind: 'text'; text: string };
+export type Puzzle = { id: string; tiles: PuzzleTile[]; answer: string; hint?: string };
+
+/** Everything a group can customise from /admin. Each game reads what it needs. */
+export type GameContent = {
+  words: string[];
+  pictures: AssetRef[];
+  questions: KalakQuestion[];
+  puzzles: Puzzle[];
+  roleArt: Record<string, AssetRef>;
+  cardBack: AssetRef | null;
+};
+
+export type LobbyTeam = { id: string; name: Localized; color: string };
+export type LobbyRole = {
   id: string;
-  label: Localized;
-  /** Width / height, e.g. 5 / 7 for a playing card. The crop tool locks to it. */
-  aspect: number;
-  /** 'per-member' slots get one image for each friend (e.g. Mafia portraits). */
-  scope: 'per-member' | 'deck' | 'single';
+  name: Localized;
+  hint?: Localized;
+  /** At most this many per team (or in the room for teamless roles). */
+  max?: number;
+  /** Roles like host or narrator sit outside the teams. */
+  teamless?: boolean;
+};
+
+export type LobbyConfig = {
+  teams?: LobbyTeam[];
+  roles?: LobbyRole[];
+  /** Role given to people when they arrive. */
+  defaultRole?: string;
 };
 
 export type GameMeta = {
@@ -28,28 +62,54 @@ export type GameMeta = {
   name: Localized;
   tagline: Localized;
   players: [min: number, max: number];
-  /** 'screen' means a TV/laptop board is supported; 'host' means a host controller seat exists. */
   surfaces: Surface[];
-  /** Games without an engine yet show as "soon" in the picker. */
   status: 'ready' | 'soon';
+  lobby: LobbyConfig;
+  /** Accent used for this game's chrome (CSS colour). */
+  accent: string;
+  /** Rendered automatically in the lobby. */
+  settingFields: SettingField[];
 };
 
 /** Engines return an error code (translated on the client) instead of throwing. */
 export type GameError = { error: string };
 
-export type GameModule<State = unknown, Action = unknown, Settings = unknown, View = unknown> = {
+export type SettingField =
+  | { id: string; kind: 'choice'; label: Localized; options: { value: string; label: Localized }[] }
+  | { id: string; kind: 'number'; label: Localized; min: number; max: number; step?: number; unit?: Localized }
+  | { id: string; kind: 'toggle'; label: Localized };
+
+export type GameModule<State = any, View = unknown, Settings extends Record<string, unknown> = Record<string, any>> = {
   meta: GameMeta;
-  assetSlots: AssetSlot[];
   defaultSettings: Settings;
   parseSettings(input: unknown): Settings | GameError;
+  /** Lobby readiness: who must be seated where before the admin can start. */
   seatRules(seats: Seat[], settings: Settings): true | GameError;
-  setup(settings: Settings, seats: Seat[], rng: Rng, now: number): State;
-  transition(state: State, seatId: string, action: Action, rng: Rng, now: number): State | GameError;
+  setup(settings: Settings, seats: Seat[], content: GameContent, ctx: Ctx): State;
+  /** Validates the raw action from the browser; never trust its shape. */
+  transition(state: State, seatId: string, action: unknown, ctx: Ctx): State | GameError;
   /** The hidden-information filter: everything a viewer receives goes through here. */
-  view(state: State, viewer: Viewer): View;
-  /** Next timer the room should wake up for (Durable Object alarm), if any. */
+  view(state: State, viewer: Viewer, ctx: Omit<Ctx, 'rng'>): View;
+  /** Next moment the room must wake up for a timer, if any. */
   nextDeadline?(state: State): number | null;
+  tick?(state: State, ctx: Ctx): State;
+  /** Actions that may race harmlessly (e.g. marks) skip the stale-version check. */
+  raceSafe?(action: unknown): boolean;
 };
 
 export const isGameError = (value: unknown): value is GameError =>
-  typeof value === 'object' && value !== null && 'error' in value;
+  typeof value === 'object' && value !== null && 'error' in value && typeof (value as GameError).error === 'string';
+
+export const fail = (error: string): GameError => ({ error });
+
+export function shuffled<T>(items: readonly T[], rng: Rng): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [result[i], result[j]] = [result[j]!, result[i]!];
+  }
+  return result;
+}
+
+export const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);

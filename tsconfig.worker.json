@@ -6,14 +6,15 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "types": ["@cloudflare/workers-types", "vite/client"]
+    "types": ["vite/client"]
   },
-  "include": ["worker", "src/games/**/*.ts"],
-  "exclude": ["src/games/**/*.test.ts"]
+  "include": ["worker", "src/games/**/*.ts", "src/platform/room/**/*.ts"],
+  "exclude": ["**/*.test.ts", "src/platform/room/client.ts", "src/games/client.ts", "src/games/client-types.ts"]
 }

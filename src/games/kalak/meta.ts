@@ -9,5 +9,8 @@ export const meta: GameMeta = {
   },
   players: [3, 12],
   surfaces: ['phone', 'screen'],
-  status: 'soon',
+  status: 'ready',
+  accent: 'oklch(0.8 0.13 78)',
+  settingFields: [],
+  lobby: {},
 };

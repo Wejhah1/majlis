@@ -1,0 +1,203 @@
+.sadu-band {
+  block-size: 10px;
+  background: var(--sadu) repeat-x center / auto 100%;
+  opacity: 0.9;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem var(--gutter);
+}
+
+.topbar__end {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  min-inline-size: 0;
+}
+
+.wordmark > span:first-child {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--brass);
+}
+
+.wordmark__group {
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: var(--step--1);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page {
+  min-block-size: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page__narrow {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+  inline-size: min(100%, 34rem);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 5vw, 3.5rem) var(--gutter) 3rem;
+}
+
+.page__title {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+}
+
+:lang(en) .page__title {
+  font-family: var(--font-latin);
+  font-weight: 800;
+  font-size: var(--step-2);
+  letter-spacing: -0.015em;
+}
+
+.notice {
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-control);
+  background: oklch(0.8 0.13 78 / 0.1);
+  color: var(--brass);
+  font-size: var(--step--1);
+}
+
+.notice--inline {
+  margin: 0 var(--gutter) 0.75rem;
+}
+
+.conn-banner {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 40;
+  margin: 0;
+  padding: 0.45rem var(--gutter);
+  background: oklch(0.42 0.13 30);
+  color: oklch(0.97 0.01 60);
+  font-size: var(--step--1);
+  text-align: center;
+}
+
+.form-error {
+  color: oklch(0.75 0.14 35);
+  font-size: var(--step--1);
+}
+
+.sheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.inline-form {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.inline-form__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tag {
+  display: inline-block;
+  margin-inline-start: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--ink-2);
+  color: var(--text-dim);
+  font-size: 0.72em;
+  font-weight: 600;
+  vertical-align: 0.1em;
+}
+
+.tag--brass {
+  background: oklch(0.8 0.13 78 / 0.16);
+  color: var(--brass);
+}
+
+.panel-title {
+  font-size: var(--step-0);
+  font-weight: 700;
+}
+
+/* ---------- Who are you ---------- */
+
+.who {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.who__roster {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.who__faces {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr));
+  gap: 0.5rem;
+}
+
+.who__face {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: var(--step--1);
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.who__face span:last-child {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.who__face:hover {
+  background: var(--ink-2);
+  color: var(--text);
+}
+
+.who__face[aria-pressed='true'] {
+  background: oklch(0.8 0.13 78 / 0.14);
+  color: var(--text);
+}
+
+.who__face[aria-pressed='true'] .avatar {
+  box-shadow:
+    0 0 0 2px var(--ink-1),
+    0 0 0 4px var(--brass);
+}
+
+.who__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}

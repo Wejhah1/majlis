@@ -7,7 +7,26 @@ export const meta: GameMeta = {
     ar: 'صور على الشاشة، فريقين يخمّنون، والمقدّم يوزّع النقاط.',
     en: 'Pictures on the TV, two teams guessing, the host hands out points.',
   },
-  players: [2, 20],
+  players: [3, 20],
   surfaces: ['screen', 'host', 'phone'],
-  status: 'soon',
+  status: 'ready',
+  accent: 'oklch(0.72 0.15 55)',
+  settingFields: [],
+  lobby: {
+    teams: [
+      { id: 'falcons', name: { ar: 'الصقور', en: 'Falcons' }, color: 'oklch(0.8 0.13 78)' },
+      { id: 'wolves', name: { ar: 'الذيابة', en: 'Wolves' }, color: 'oklch(0.66 0.1 230)' },
+    ],
+    roles: [
+      { id: 'player', name: { ar: 'لاعب', en: 'Player' } },
+      {
+        id: 'host',
+        name: { ar: 'المقدّم', en: 'Host' },
+        hint: { ar: 'يتحكم من جواله ويوزّع النقاط', en: 'Runs the show from their phone' },
+        max: 1,
+        teamless: true,
+      },
+    ],
+    defaultRole: 'player',
+  },
 };
