@@ -11,6 +11,10 @@ export const meta: GameMeta = {
   surfaces: ['phone', 'screen'],
   status: 'ready',
   accent: 'oklch(0.8 0.13 78)',
-  settingFields: [],
+  settingFields: [
+    { id: 'rounds', kind: 'number', label: { ar: 'عدد الأسئلة', en: 'Questions' }, min: 1, max: 30 },
+    { id: 'writeSeconds', kind: 'number', label: { ar: 'وقت الكتابة', en: 'Writing time' }, min: 0, max: 300, step: 15, unit: { ar: 'ثانية (٠ = بدون)', en: 'sec (0 = off)' } },
+    { id: 'voteSeconds', kind: 'number', label: { ar: 'وقت التصويت', en: 'Voting time' }, min: 0, max: 180, step: 10, unit: { ar: 'ثانية (٠ = بدون)', en: 'sec (0 = off)' } },
+  ],
   lobby: {},
 };

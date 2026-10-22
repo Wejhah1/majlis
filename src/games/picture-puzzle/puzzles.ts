@@ -2,7 +2,7 @@ import type { Puzzle } from '../types';
 
 // Starter rebuses made of emoji tiles. Groups upload real photo puzzles from /admin.
 const p = (id: string, tiles: string[], answer: string, hint?: string): Puzzle => ({
-  id: `d${id}`,
+  id: `builtin-${id}`,
   tiles: tiles.map((text) => ({ kind: 'text', text })),
   answer,
   hint,

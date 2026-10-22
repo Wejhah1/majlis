@@ -69,7 +69,8 @@ export async function loadContent(env: Env, gameId: string): Promise<GameContent
   const rows = await listContent(env, gameId);
   const options = (await getSetting<Record<string, boolean>>(env, `defaults:${gameId}`)) ?? {};
   const useDefaults = options.include !== false;
-  const of = <T>(kind: string) => rows.filter((r) => r.kind === kind).map((r) => r.data as T);
+  // Rows carry their D1 id so games can tell the group's own content from built-ins.
+  const of = <T>(kind: string) => rows.filter((r) => r.kind === kind).map((r) => ({ id: r.id, ...(r.data as object) }) as T);
 
   const customWords = of<{ words: string[] }>('words')[0]?.words ?? [];
   const words = customWords.length >= 36 && !useDefaults ? customWords : [...customWords, ...(defaultWords as string[])];

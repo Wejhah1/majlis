@@ -2,7 +2,7 @@ import type { KalakQuestion } from '../types';
 
 // Built-in starter questions. Groups add their own (inside jokes work best) from /admin.
 // Every answer here is short, true, and surprising enough that a fake can beat it.
-const q = (id: string, category: string, prompt: string, answer: string): KalakQuestion => ({ id: `d${id}`, category, prompt, answer });
+const q = (id: string, category: string, prompt: string, answer: string): KalakQuestion => ({ id: `builtin-${id}`, category, prompt, answer });
 
 export const defaultQuestions: KalakQuestion[] = [
   q('01', 'حيوانات', 'كم قلب عند الأخطبوط؟', 'ثلاثة'),

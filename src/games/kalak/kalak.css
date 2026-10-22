@@ -1,0 +1,429 @@
+/* كَلَك: a loud quiz show. Paper answer slips, a brass "truth" stamp, bouncy reveals. */
+.kalak {
+  --slip: oklch(0.95 0.025 85);
+  --slip-ink: oklch(0.24 0.02 55);
+  --pop: oklch(0.8 0.15 78);
+  flex: 1;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 1.25rem;
+  padding: 1rem var(--gutter) 3rem;
+  background:
+    radial-gradient(70% 40% at 50% 0%, oklch(0.8 0.13 78 / 0.14), transparent 70%),
+    var(--ink-0);
+}
+
+.kalak__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  inline-size: min(100%, 46rem);
+  font-size: var(--step--1);
+}
+
+.kalak__round {
+  color: var(--text-dim);
+}
+
+.kalak__cat {
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  background: oklch(0.8 0.13 78 / 0.15);
+  color: var(--brass);
+  font-weight: 700;
+}
+
+.kalak__timer {
+  margin-inline-start: auto;
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: 50%;
+  background: var(--ink-2);
+  font-family: var(--font-latin);
+  font-size: var(--step-1);
+  font-weight: 800;
+}
+
+.kalak__timer.is-urgent {
+  background: oklch(0.55 0.18 30);
+  animation: kalak-wobble 0.5s ease-in-out infinite;
+}
+
+@keyframes kalak-wobble {
+  50% {
+    rotate: 8deg;
+    scale: 1.08;
+  }
+}
+
+.kalak__question {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  inline-size: min(100%, 46rem);
+  animation: kalak-in 0.6s var(--spring);
+}
+
+.kalak__image {
+  inline-size: min(100%, 26rem);
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px -20px oklch(0 0 0 / 0.8);
+}
+
+.kalak__prompt {
+  font-size: var(--step-2);
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.kalak__blank {
+  display: inline-block;
+  inline-size: 4.5em;
+  margin-inline: 0.2em;
+  border-block-end: 3px dashed var(--brass);
+  vertical-align: baseline;
+}
+
+@keyframes kalak-in {
+  from {
+    opacity: 0;
+    scale: 0.92;
+    translate: 0 20px;
+  }
+}
+
+/* ---------- Writing ---------- */
+
+.kalak__write {
+  display: grid;
+  gap: 0.5rem;
+  inline-size: min(100%, 32rem);
+}
+
+.kalak__write-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.kalak__input {
+  font-size: var(--step-1);
+}
+
+.kalak__sent {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+}
+
+.kalak__people {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kalak__people li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  font-size: var(--step--1);
+  color: var(--text-faint);
+  opacity: 0.55;
+  transition: opacity 0.3s;
+}
+
+.kalak__people li.is-done {
+  opacity: 1;
+  color: var(--text);
+}
+
+.kalak__people li.is-done::after {
+  content: '';
+  position: absolute;
+  inset-block-start: -0.2rem;
+  inset-inline-end: -0.2rem;
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3 3 7-7' fill='none' stroke='%231c1813' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 70% no-repeat,
+    var(--pop);
+  animation: pop 0.4s var(--spring);
+}
+
+.kalak__people--small {
+  gap: 0.4rem;
+}
+
+/* ---------- Slips ---------- */
+
+.kalak__ask {
+  font-weight: 700;
+  color: var(--brass);
+}
+
+.kalak__slips {
+  display: grid;
+  gap: 0.6rem;
+  inline-size: min(100%, 34rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kalak__slips li {
+  animation: slip-in 0.5s var(--spring) backwards;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+.kalak__slips li:nth-child(odd) .kalak-slip {
+  rotate: -0.6deg;
+}
+
+.kalak__slips li:nth-child(even) .kalak-slip {
+  rotate: 0.5deg;
+}
+
+@keyframes slip-in {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+    rotate: -4deg;
+  }
+}
+
+.kalak-slip {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  inline-size: 100%;
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  border: 0;
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, transparent 0 1.6rem, oklch(0.6 0.12 30 / 0.25) 1.6rem calc(1.6rem + 1px), transparent 0),
+    var(--slip);
+  color: var(--slip-ink);
+  text-align: start;
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 0.5) inset,
+    0 10px 20px -12px oklch(0 0 0 / 0.8);
+  transition:
+    translate 0.25s var(--spring),
+    rotate 0.25s var(--spring),
+    box-shadow 0.2s;
+}
+
+[dir='rtl'] .kalak-slip {
+  background:
+    linear-gradient(-90deg, transparent 0 1.6rem, oklch(0.6 0.12 30 / 0.25) 1.6rem calc(1.6rem + 1px), transparent 0),
+    var(--slip);
+}
+
+button.kalak-slip:not(:disabled):hover {
+  translate: 0 -3px;
+  rotate: 0deg !important;
+}
+
+.kalak-slip[aria-pressed='true'] {
+  box-shadow:
+    0 0 0 3px var(--pop),
+    0 14px 24px -12px oklch(0 0 0 / 0.8);
+}
+
+.kalak-slip:disabled {
+  cursor: default;
+}
+
+.kalak-slip__text {
+  font-size: var(--step-1);
+  font-weight: 700;
+  padding-inline-start: 1.1rem;
+}
+
+.kalak-slip__tag {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.6rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--slip-ink);
+  color: var(--slip);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.kalak-slip--mine {
+  inline-size: min(100%, 26rem);
+}
+
+.kalak-slip--revealed.is-truth {
+  background: var(--pop);
+  box-shadow:
+    0 0 0 3px oklch(0.85 0.14 85),
+    0 0 40px oklch(0.8 0.15 78 / 0.45),
+    0 14px 24px -12px oklch(0 0 0 / 0.8);
+  animation: truth 0.9s var(--spring) backwards;
+  animation-delay: calc(var(--i) * 70ms + 0.4s);
+}
+
+@keyframes truth {
+  from {
+    scale: 0.9;
+    rotate: -3deg;
+  }
+}
+
+.kalak-slip__stamp {
+  position: absolute;
+  inset-block-start: -0.7rem;
+  inset-inline-end: 0.8rem;
+  padding: 0.1rem 0.6rem;
+  border: 2px solid var(--slip-ink);
+  border-radius: 4px;
+  background: var(--slip);
+  color: var(--slip-ink);
+  font-family: var(--font-latin);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  rotate: 6deg;
+}
+
+.kalak-slip__by {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-inline-start: 1.1rem;
+  font-size: var(--step--1);
+  opacity: 0.75;
+}
+
+.kalak-slip__voters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding-inline-start: 1.1rem;
+}
+
+.kalak-voter {
+  animation: pop 0.4s var(--spring) backwards;
+}
+
+/* ---------- Scores ---------- */
+
+.kalak__scores {
+  inline-size: min(100%, 30rem);
+}
+
+.kalak__scores ol {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kalak__scores li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.5rem auto 1fr auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--ink-1);
+  animation: slip-in 0.5s var(--spring) backwards;
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+.kalak__bar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: calc(var(--w) * 100%);
+  background: oklch(0.8 0.13 78 / 0.1);
+  transition: inline-size 0.8s var(--spring);
+  z-index: 0;
+}
+
+.kalak__scores li > :not(.kalak__bar) {
+  position: relative;
+  z-index: 1;
+}
+
+.kalak__rank {
+  color: var(--text-faint);
+  font-weight: 700;
+  text-align: center;
+}
+
+.kalak__name {
+  font-weight: 600;
+}
+
+.kalak__plus {
+  color: oklch(0.8 0.15 150);
+  font-weight: 800;
+  animation: pop 0.5s var(--spring);
+}
+
+.kalak__score {
+  min-inline-size: 2rem;
+  font-family: var(--font-latin);
+  font-weight: 800;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.kalak__champion {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  margin-block-end: 1.5rem;
+  animation: kalak-in 0.8s var(--spring);
+}
+
+.kalak__champion .avatar {
+  box-shadow:
+    0 0 0 4px var(--ink-0),
+    0 0 0 7px var(--pop),
+    0 0 50px oklch(0.8 0.15 78 / 0.5);
+}
+
+.kalak__champion-title {
+  color: var(--brass);
+  font-weight: 700;
+}
+
+.kalak__champion-name {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  line-height: 1.1;
+}
+
+.kalak__admin {
+  display: flex;
+  gap: 0.6rem;
+}
+
+/* TV: the question and slips get big. */
+.kalak--screen .kalak__prompt {
+  font-size: var(--step-3);
+}
+
+.kalak--screen .kalak__slips {
+  inline-size: min(100%, 52rem);
+  grid-template-columns: repeat(2, 1fr);
+}
