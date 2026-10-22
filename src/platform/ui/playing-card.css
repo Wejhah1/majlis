@@ -16,7 +16,9 @@
   color: var(--paper-ink);
   text-align: start;
   transform: perspective(900px) translateY(var(--lift)) rotateX(var(--rx)) rotateY(var(--ry));
-  transform-style: preserve-3d;
+  /* Keep blending inside the card: page-wide blend layers under 3D transforms make Chrome
+     drop and redraw text elsewhere on the page (the "flickering text" glitch). */
+  isolation: isolate;
   transition:
     transform 0.6s var(--spring),
     box-shadow 0.4s var(--ease-out);

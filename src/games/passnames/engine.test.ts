@@ -4,7 +4,7 @@ import words from './words.json';
 import type { Ctx, GameContent, Seat } from '../types';
 import { isGameError } from '../types';
 
-const content: GameContent = { words, pictures: [], questions: [], puzzles: [], roleArt: {}, cardBack: null };
+const content: GameContent = { words, pictures: [], agentPhotos: [], questions: [], puzzles: [], roleArt: {}, cardBack: null };
 const seats: Seat[] = [
   { id: 'bs', name: 'BlueSpy', team: 'blue', role: 'spy', portrait: null },
   { id: 'ba', name: 'BlueAgent', team: 'blue', role: 'agent', portrait: null },

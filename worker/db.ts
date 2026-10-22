@@ -83,6 +83,10 @@ export async function loadContent(env: Env, gameId: string): Promise<GameContent
   return {
     words,
     pictures: of<{ asset: AssetRef }>('picture').map((p) => p.asset),
+    // Dedicated agent photos if uploaded, otherwise everyone's roster portrait.
+    agentPhotos: of<{ asset: AssetRef }>('agentPhoto').length
+      ? of<{ asset: AssetRef }>('agentPhoto').map((p) => p.asset)
+      : (await getRoster(env)).flatMap((m) => (m.portrait ? [m.portrait] : [])),
     questions,
     puzzles,
     roleArt,

@@ -301,6 +301,7 @@ function PassnamesSection({ data, reload }: SectionProps) {
   const current = (rowsOf(data, 'passnames', 'words')[0]?.data.words as string[] | undefined) ?? [];
   const [text, setText] = useState(current.join('\n'));
   const photos = rowsOf(data, 'passnames', 'picture');
+  const agents = rowsOf(data, 'passnames', 'agentPhoto');
 
   return (
     <>
@@ -329,6 +330,13 @@ function PassnamesSection({ data, reload }: SectionProps) {
           <DefaultsToggle data={data} reload={reload} game="passnames" />
           <button className="button button--primary">{tr(A.save)}</button>
         </form>
+      </Section>
+      <Section title={tr(A.agentsTitle)} text={tr(A.agentsText)}>
+        <div className="admin-inline">
+          <PhotoPicker aspect={4 / 3} multiple label={tr(A.addPhotos)} className="button button--primary" onUploaded={(ref) => api.addContent('passnames', 'agentPhoto', { asset: ref }).then(reload)} />
+          <span className="faint">{agents.length ? tr(A.photosCount, { n: num(agents.length) }) : tr(A.agentsFallback)}</span>
+        </div>
+        <AssetGrid rows={agents} reload={reload} />
       </Section>
       <Section title={tr(A.photosTitle)} text={tr(A.photosText)}>
         <div className="admin-inline">

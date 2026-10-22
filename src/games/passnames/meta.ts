@@ -27,7 +27,7 @@ export const meta: GameMeta = {
       label: { ar: 'البطاقات', en: 'Cards' },
       options: [
         { value: 'words', label: { ar: 'كلمات', en: 'Words' } },
-        { value: 'photos', label: { ar: 'صور الشلة', en: 'Our photos' } },
+        { value: 'photos', label: { ar: 'صور', en: 'Photos' } },
       ],
     },
     { id: 'timerSeconds', kind: 'number', label: { ar: 'وقت التخمين', en: 'Guess timer' }, min: 0, max: 600, step: 10, unit: { ar: 'ثانية (٠ = بدون)', en: 'sec (0 = off)' } },

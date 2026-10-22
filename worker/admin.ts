@@ -112,6 +112,7 @@ const CONTENT_KINDS: Record<string, (data: Record<string, unknown>) => unknown> 
     return { words: [...new Set(d.words.map((w) => text(w, 40, 'WORDS_INVALID')))] };
   },
   picture: (d) => ({ asset: assetRef(d.asset) }),
+  agentPhoto: (d) => ({ asset: assetRef(d.asset) }),
   cardBack: (d) => ({ asset: assetRef(d.asset) }),
   roleArt: (d) => ({ role: text(d.role, 30), asset: assetRef(d.asset) }),
   question: (d) => ({

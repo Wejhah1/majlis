@@ -125,6 +125,7 @@
 
 .role-card {
   --w: clamp(12rem, 52vw, 17rem);
+  isolation: isolate;
   inline-size: var(--w);
   aspect-ratio: 5 / 7;
   padding: 0;

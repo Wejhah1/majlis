@@ -7,7 +7,7 @@ import words from './passnames/words.json';
 import type { Ctx, GameContent, GameModule, Seat } from './types';
 import { isGameError } from './types';
 
-const content: GameContent = { words, pictures: [], questions: defaultQuestions, puzzles: defaultPuzzles, roleArt: {}, cardBack: null };
+const content: GameContent = { words, pictures: [], agentPhotos: [], questions: defaultQuestions, puzzles: defaultPuzzles, roleArt: {}, cardBack: null };
 
 function play(game: GameModule, seats: Seat[], settings: Record<string, unknown>, isOver: (s: any) => boolean, nudge: (s: any) => unknown) {
   let seed = 42;

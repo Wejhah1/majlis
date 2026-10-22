@@ -1,8 +1,10 @@
-import { useEffect, useId, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import type { GameClient, GameViewProps } from '../client-types';
 import type { Dict } from '../../platform/i18n/strings';
 import { useI18n } from '../../platform/i18n/I18n';
 import { MediaImage, preload } from '../../platform/ui/Media';
+import { play } from '../../platform/ui/sfx';
 import type { CellView, LogEntry, Team, View } from './index';
 import './passnames.css';
 
@@ -10,6 +12,7 @@ const T = {
   blue: ['الأزرق', 'Blue'],
   red: ['الأحمر', 'Red'],
   yourTurn: ['دوركم!', 'Your turn!'],
+  yourGuess: ['التلميح لكم! خمّنوا', 'Your clue! Start guessing'],
   theirTurn: ['دور الفريق {team}', "{team} team's turn"],
   spyThinking: ['الجاسوس يفكّر بتلميح…', 'Spymaster is thinking…'],
   clue: ['التلميح', 'Clue'],
@@ -178,6 +181,7 @@ function Passnames(props: Props) {
   return (
     <div className={`pn pn--${v.size === 6 ? 'six' : 'five'}${screen ? ' pn--screen' : ''}`} data-active={v.active} data-phase={v.phase}>
       <Scoreboard v={v} left={left} teamName={teamName} />
+      <TurnPopup v={v} teamName={teamName} />
 
       <div className="pn__status" aria-live="polite">
         {v.phase === 'finished' && v.winner ? (
@@ -190,7 +194,7 @@ function Passnames(props: Props) {
           <p className="pn__clue">
             <span className="pn__clue-word">{v.clue.text}</span>
             <span className="pn__clue-count">{v.clue.count === 'unlimited' ? '∞' : num(Number(v.clue.count))}</span>
-            <span className="pn__clue-left">{guessesLeft === null ? tr(T.guessesFree) : tr(T.guessesLeft, { n: num(Math.max(0, guessesLeft)) })}</span>
+            <Pips total={v.clue.count === 'unlimited' ? null : Number(v.clue.count) + 1} left={guessesLeft} label={guessesLeft === null ? tr(T.guessesFree) : tr(T.guessesLeft, { n: num(Math.max(0, guessesLeft)) })} />
           </p>
         ) : (
           <p className="pn__banner">{myTurn ? (isSpy ? tr(T.yourTurn) : tr(T.spyThinking)) : tr(T.theirTurn, { team: teamName(v.active) })}</p>
@@ -233,6 +237,78 @@ function Passnames(props: Props) {
 
       <Log v={v} />
     </div>
+  );
+}
+
+/** Remaining guesses as dots: filled = still available. */
+function Pips({ total, left, label }: { total: number | null; left: number | null; label: string }) {
+  if (total === null || left === null)
+    return (
+      <span className="pn-pips pn-pips--free" role="img" aria-label={label}>
+        ∞
+      </span>
+    );
+  return (
+    <span className="pn-pips" role="img" aria-label={label}>
+      {Array.from({ length: total }, (_, i) => (
+        <span key={i} className={i < Math.max(0, left) ? 'is-on' : ''} />
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Big moment cards: a new turn ("Your turn!") and a fresh clue slide in over the board for a
+ * second or two, in the team's colour, with a sound and a buzz on phones of that team.
+ */
+function TurnPopup({ v, teamName }: { v: View; teamName(t: Team): string }) {
+  const { tr, num } = useI18n();
+  const [pop, setPop] = useState<{ key: string; kind: 'turn' | 'clue'; team: Team } | null>(null);
+  const seen = useRef({ turn: v.turnNumber, clue: v.clue?.text ?? null });
+  const mine = v.me?.team === v.active;
+
+  useEffect(() => {
+    if (v.phase === 'finished' || v.phase === 'deal') return;
+    let next: typeof pop = null;
+    if (v.clue && v.clue.text !== seen.current.clue) next = { key: `c${v.turnNumber}`, kind: 'clue', team: v.active };
+    else if (v.turnNumber !== seen.current.turn) next = { key: `t${v.turnNumber}`, kind: 'turn', team: v.active };
+    seen.current = { turn: v.turnNumber, clue: v.clue?.text ?? null };
+    if (!next) return;
+    setPop(next);
+    if (mine) {
+      play(next.kind === 'clue' ? 'reveal' : 'flip');
+      navigator.vibrate?.(next.kind === 'clue' ? [60, 60, 60] : 80);
+    }
+    const t = setTimeout(() => setPop(null), next.kind === 'clue' ? 2400 : 1600);
+    return () => clearTimeout(t);
+  }, [v.turnNumber, v.clue, v.phase, v.active, mine]);
+
+  return (
+    <AnimatePresence>
+      {pop && (
+        <motion.div
+          key={pop.key}
+          className={`pn-pop pn-pop--${pop.team}`}
+          initial={{ opacity: 0, scale: 0.7, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 1.08, y: -20 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+          onClick={() => setPop(null)}
+          role="status"
+        >
+          {pop.kind === 'turn' ? (
+            <p className="pn-pop__title">{mine ? tr(T.yourTurn) : tr(T.theirTurn, { team: teamName(pop.team) })}</p>
+          ) : (
+            <>
+              <p className="pn-pop__kicker">{mine && v.me?.role === 'agent' ? tr(T.yourGuess) : tr(T.clue)}</p>
+              <p className="pn-pop__clue">
+                {v.clue?.text} <span className="pn-pop__count">{v.clue?.count === 'unlimited' ? '∞' : num(Number(v.clue?.count))}</span>
+              </p>
+            </>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -285,25 +361,36 @@ function Card({
   const { tr } = useI18n();
   const label = cellLabel(c, tr);
   const keyColor = spy && !c.revealed ? c.color : null;
+  const word = c.word?.replace(/_/g, ' ') ?? '';
+  const coverPhoto = c.cover ?? c.picture;
   return (
     <div
       className={`pn-card${c.revealed ? ' is-revealed' : ''}${selected ? ' is-selected' : ''}${myMark ? ' is-marked' : ''}${c.picture ? ' has-picture' : ''}`}
-      data-color={c.revealed ? c.color : undefined}
       data-key={keyColor ?? undefined}
       style={{ '--i': index } as React.CSSProperties}
       role="gridcell"
     >
-      <button type="button" className="pn-card__flip" onClick={onClick} disabled={!interactive} aria-label={label} aria-pressed={myMark}>
-        <span className="pn-card__front">
-          {c.picture ? <MediaImage asset={c.picture} alt="" sizes="(max-width: 600px) 20vw, 160px" className="pn-card__photo" /> : null}
-          {c.word && <span className="pn-card__word">{c.word.replace(/_/g, ' ')}</span>}
-        </span>
-        <span className="pn-card__back" aria-hidden="true">
-          {c.picture ? <MediaImage asset={c.picture} alt="" sizes="160px" className="pn-card__photo" /> : null}
-          {c.word && <span className="pn-card__word">{c.word.replace(/_/g, ' ')}</span>}
-          <span className="pn-card__stamp" />
-        </span>
+      <button type="button" className="pn-card__face" onClick={onClick} disabled={!interactive} aria-label={label} aria-pressed={myMark}>
+        {c.picture ? (
+          <MediaImage asset={c.picture} alt="" sizes="(max-width: 600px) 20vw, 160px" className="pn-card__photo" />
+        ) : (
+          <>
+            {/* Like the printed card: the word upside down for the other side of the table. */}
+            <span className="pn-card__mirror" aria-hidden="true">
+              {word}
+            </span>
+            <AgentIcon />
+            <span className="pn-card__label">{word}</span>
+          </>
+        )}
       </button>
+      {c.revealed && c.color && (
+        <span className="pn-cover" data-color={c.color} aria-hidden="true">
+          {coverPhoto ? <MediaImage asset={coverPhoto} alt="" sizes="(max-width: 600px) 20vw, 200px" className="pn-cover__photo" /> : <AgentIcon big />}
+          {c.color === 'black' && <span className="pn-cover__x" />}
+          {word && <span className="pn-cover__word">{word}</span>}
+        </span>
+      )}
       {c.marks.length > 0 && !c.revealed && (
         <span className="pn-card__marks" aria-label={c.marks.map((m) => m.name).join('، ')}>
           {c.marks.slice(0, 4).map((m) => (
@@ -319,6 +406,18 @@ function Card({
         </button>
       )}
     </div>
+  );
+}
+
+/** The little spy silhouette printed on every word card (and on photo-less agent cards). */
+function AgentIcon({ big = false }: { big?: boolean }) {
+  return (
+    <svg className={big ? 'pn-agent pn-agent--big' : 'pn-agent'} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 9.5h14l-1.6-4.2a1 1 0 0 0-1-.7H7.6a1 1 0 0 0-1 .7z" fill="currentColor" />
+      <rect x="3" y="9.5" width="18" height="1.6" rx=".8" fill="currentColor" />
+      <path d="M12 12.2a3.6 3.6 0 0 1 3.6 3.6V17H8.4v-1.2a3.6 3.6 0 0 1 3.6-3.6z" fill="currentColor" opacity=".55" />
+      <path d="M5 21c.6-2.6 3.3-4.2 7-4.2s6.4 1.6 7 4.2z" fill="currentColor" />
+    </svg>
   );
 }
 

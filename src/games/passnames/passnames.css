@@ -183,12 +183,15 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+/* One card = the printed word card + (once revealed) the agent card laid on top.
+   Deliberately flat 2D: no 3D flips, which made text flicker in Chrome. */
 .pn-card {
+  --r: clamp(5px, 0.8vw, 9px);
   position: relative;
   aspect-ratio: 7 / 5;
-  perspective: 700px;
-  animation: pn-deal 0.5s var(--spring) backwards;
-  animation-delay: calc(var(--i) * 18ms);
+  container-type: inline-size;
+  animation: pn-deal 0.45s var(--ease-out) backwards;
+  animation-delay: calc(var(--i) * 16ms);
 }
 
 .pn-card.has-picture {
@@ -198,93 +201,94 @@
 @keyframes pn-deal {
   from {
     opacity: 0;
-    translate: 0 30px;
-    rotate: -4deg;
+    translate: 0 18px;
   }
 }
 
-.pn-card__flip {
-  position: relative;
-  display: block;
-  inline-size: 100%;
-  block-size: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: clamp(5px, 0.8vw, 9px);
-  background: none;
-  color: inherit;
-  transform-style: preserve-3d;
-  transition: transform 0.7s var(--spring);
-}
-
-.pn-card__flip:disabled {
-  cursor: default;
-}
-
-.pn-card.is-revealed .pn-card__flip {
-  transform: rotateY(180deg);
-}
-
-.pn-card__front,
-.pn-card__back {
+.pn-card__face {
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
+  grid-template-rows: 38% 1fr;
+  padding: 6cqi 6cqi 7cqi;
   overflow: hidden;
-  border-radius: inherit;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.pn-card__front {
-  background: var(--card-paper);
+  border: 0;
+  border-radius: var(--r);
+  /* Tan card stock. */
+  background: radial-gradient(120% 90% at 30% 20%, oklch(0.9 0.04 80), oklch(0.82 0.05 72));
   color: var(--card-ink);
   box-shadow:
-    inset 0 0 0 1px oklch(0.24 0.02 55 / 0.18),
-    0 1px 0 oklch(1 0 0 / 0.4) inset,
-    0 3px 0 oklch(0.55 0.04 70 / 0.55),
+    inset 0 0 0 1px oklch(0.4 0.04 60 / 0.25),
+    0 2px 0 oklch(0.55 0.05 65),
     0 8px 14px -8px oklch(0 0 0 / 0.7);
   transition:
-    translate 0.2s var(--ease-out),
-    box-shadow 0.2s;
+    translate 0.18s var(--ease-out),
+    box-shadow 0.18s;
 }
 
-/* A thin typed rule under the word, like a label on a file folder. */
-.pn-card__front::after {
-  content: '';
-  position: absolute;
-  inset-inline: 14%;
-  inset-block-end: 22%;
-  block-size: 1px;
-  background: oklch(0.24 0.02 55 / 0.15);
+.pn-card__face:disabled {
+  cursor: default;
 }
 
-.pn-card.has-picture .pn-card__front::after {
-  display: none;
-}
-
-.pn-card__flip:not(:disabled):hover .pn-card__front {
+.pn-card__face:not(:disabled):hover {
   translate: 0 -2px;
   box-shadow:
-    inset 0 0 0 1px oklch(0.24 0.02 55 / 0.18),
-    0 5px 0 oklch(0.55 0.04 70 / 0.55),
+    inset 0 0 0 1px oklch(0.4 0.04 60 / 0.25),
+    0 4px 0 oklch(0.55 0.05 65),
     0 14px 18px -8px oklch(0 0 0 / 0.7);
 }
 
-.pn-card__word {
-  position: relative;
-  z-index: 1;
-  max-inline-size: 92%;
-  font-size: clamp(0.72rem, 0.45rem + 1.1vw, 1.2rem);
+/* The upside-down word for the other side of the table: small, brown, on a lighter band. */
+.pn-card__mirror {
+  align-self: start;
+  margin-inline-end: 13cqi;
+  display: block;
+  padding: 1.5cqi 4cqi;
+  border-radius: 2cqi;
+  background: oklch(0.92 0.03 82 / 0.7);
+  color: oklch(0.5 0.06 60);
+  font-size: 9cqi;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.25;
   text-align: center;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  rotate: 180deg;
 }
 
-.pn--six .pn-card__word {
-  font-size: clamp(0.66rem, 0.4rem + 0.95vw, 1.05rem);
+.pn-agent {
+  position: absolute;
+  inset-block-start: 5cqi;
+  inset-inline-end: 7cqi;
+  inline-size: 11cqi;
+  color: oklch(0.45 0.04 60 / 0.5);
+  rotate: 180deg;
+}
+
+.pn-agent--big {
+  position: static;
+  rotate: none;
+  inline-size: 40%;
+  color: oklch(1 0 0 / 0.55);
+}
+
+/* The main word: bold black on a white strip, like the printed card. */
+.pn-card__label {
+  align-self: end;
+  display: grid;
+  place-items: center;
+  min-block-size: 30cqi;
+  padding: 1cqi 4cqi;
+  border-radius: 2.5cqi;
+  background: oklch(0.985 0.005 85);
+  box-shadow: inset 0 -2px 0 oklch(0.85 0.02 80);
+  color: oklch(0.18 0.01 60);
+  font-size: clamp(0.7rem, 15cqi, 1.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .pn-card__photo {
@@ -294,114 +298,154 @@
   block-size: 100%;
 }
 
-.pn-card.has-picture .pn-card__word {
-  align-self: end;
-  margin-block-end: 6%;
-  padding: 0.1rem 0.45rem;
-  border-radius: 4px;
-  background: oklch(0.93 0.03 85 / 0.88);
-  font-size: clamp(0.6rem, 0.4rem + 0.6vw, 0.85rem);
+.pn-card.has-picture .pn-card__face {
+  display: block;
+  padding: 0;
 }
 
-/* Spymaster key: an inked edge and a faint wash on hidden cards. */
-.pn-card[data-key] .pn-card__front {
-  --k: var(--card-paper);
-  background: color-mix(in oklab, var(--k) 22%, var(--card-paper));
+/* Spymaster key: the colour shows as a thick inked frame around hidden cards. */
+.pn-card[data-key] .pn-card__face {
+  --k: transparent;
   box-shadow:
-    inset 0 0 0 3px var(--k),
-    0 3px 0 oklch(0.55 0.04 70 / 0.55),
+    inset 0 0 0 4px var(--k),
+    0 2px 0 oklch(0.55 0.05 65),
     0 8px 14px -8px oklch(0 0 0 / 0.7);
 }
 
-.pn-card[data-key='blue'] .pn-card__front {
+.pn-card[data-key='blue'] .pn-card__face {
   --k: var(--blue);
 }
-.pn-card[data-key='red'] .pn-card__front {
+.pn-card[data-key='red'] .pn-card__face {
   --k: var(--red);
 }
-.pn-card[data-key='neutral'] .pn-card__front {
-  --k: oklch(0.75 0.03 80);
+.pn-card[data-key='neutral'] .pn-card__face {
+  --k: oklch(0.7 0.03 80 / 0.6);
 }
-.pn-card[data-key='yellow'] .pn-card__front {
+.pn-card[data-key='yellow'] .pn-card__face {
   --k: var(--brass);
 }
-.pn-card[data-key='black'] .pn-card__front {
-  --k: oklch(0.2 0.01 60);
-  color: var(--card-ink);
+.pn-card[data-key='black'] .pn-card__face {
+  --k: oklch(0.15 0.01 60);
+  background: radial-gradient(120% 90% at 30% 20%, oklch(0.6 0.02 70), oklch(0.45 0.02 60));
 }
 
-/* Revealed: the back face is the inked agent card. */
-.pn-card__back {
-  transform: rotateY(180deg);
-  background: var(--c, var(--card-paper));
-  color: oklch(0.97 0.01 80);
-  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.15);
+.pn-card[data-key='black'] .pn-card__mirror {
+  background: oklch(0.3 0.01 60 / 0.6);
+  color: oklch(0.85 0.02 80);
 }
 
-.pn-card__back .pn-card__word {
-  opacity: 0.85;
+/* ---------- Agent card laid on top when revealed ---------- */
+
+.pn-cover {
+  --c: var(--card-paper);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--c);
+  box-shadow:
+    inset 0 0 0 1.5px oklch(1 0 0 / 0.3),
+    0 3px 0 color-mix(in oklab, var(--c) 60%, black),
+    0 10px 16px -8px oklch(0 0 0 / 0.8);
+  animation: pn-place 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.15);
 }
 
-.pn-card__back .pn-card__photo {
-  opacity: 0.35;
-  mix-blend-mode: luminosity;
+@keyframes pn-place {
+  from {
+    opacity: 0;
+    translate: 0 -16%;
+    scale: 1.12;
+    rotate: -5deg;
+  }
 }
 
-.pn-card[data-color='blue'] .pn-card__back {
+/* The friend's photo, toned in the team colour like the printed agent illustrations. */
+.pn-cover__photo {
+  position: absolute;
+  inset: 5cqi;
+  inline-size: calc(100% - 10cqi);
+  block-size: calc(100% - 10cqi);
+  border-radius: calc(var(--r) * 0.6);
+  filter: grayscale(1) contrast(1.15);
+}
+
+.pn-cover::after {
+  content: '';
+  position: absolute;
+  inset: 5cqi;
+  border-radius: calc(var(--r) * 0.6);
+  background: var(--c);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.pn-cover[data-color='blue'] {
   --c: var(--blue);
 }
-.pn-card[data-color='red'] .pn-card__back {
+.pn-cover[data-color='red'] {
   --c: var(--red);
 }
-.pn-card[data-color='neutral'] .pn-card__back {
-  --c: oklch(0.8 0.035 80);
-  color: var(--card-ink);
-  background-image: repeating-linear-gradient(135deg, transparent 0 7px, oklch(0.24 0.02 55 / 0.06) 7px 8px);
+.pn-cover[data-color='neutral'] {
+  --c: oklch(0.8 0.04 78);
 }
-.pn-card[data-color='yellow'] .pn-card__back {
+.pn-cover[data-color='yellow'] {
   --c: var(--brass);
+}
+.pn-cover[data-color='black'] {
+  --c: oklch(0.17 0.01 50);
+}
+
+.pn-cover[data-color='black'] .pn-cover__photo {
+  filter: grayscale(1) contrast(1.4) brightness(0.55);
+}
+
+.pn-cover__x {
+  position: absolute;
+  inset: 22% 30%;
+  z-index: 1;
+  background:
+    linear-gradient(45deg, transparent 44%, var(--ember) 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, var(--ember) 44% 56%, transparent 56%);
+}
+
+/* A small ribbon keeps the word readable. */
+.pn-cover__word {
+  position: absolute;
+  inset-block-end: 7cqi;
+  inset-inline: 9cqi;
+  z-index: 1;
+  padding: 0.5cqi 3cqi;
+  border-radius: 99px;
+  background: oklch(0 0 0 / 0.45);
+  color: oklch(0.98 0.01 80);
+  font-size: clamp(0.55rem, 9cqi, 0.95rem);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pn-cover[data-color='neutral'] .pn-cover__word,
+.pn-cover[data-color='yellow'] .pn-cover__word {
+  background: oklch(1 0 0 / 0.6);
   color: var(--card-ink);
 }
-.pn-card[data-color='black'] .pn-card__back {
-  --c: oklch(0.16 0.01 60);
-}
 
-/* Rubber stamp mark on revealed cards. */
-.pn-card__stamp {
-  position: absolute;
-  inset-block-start: 8%;
-  inset-inline-end: 7%;
-  inline-size: 28%;
-  aspect-ratio: 1;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-  opacity: 0.45;
-  rotate: -12deg;
-}
+/* ---------- Selection, marks, reveal button ---------- */
 
-.pn-card[data-color='black'] .pn-card__stamp {
-  inset: auto;
-  inline-size: 60%;
-  border-color: var(--ember);
-  border-width: 3px;
-  opacity: 0.85;
-  rotate: -18deg;
-  background:
-    linear-gradient(45deg, transparent 46%, var(--ember) 46% 54%, transparent 54%),
-    linear-gradient(-45deg, transparent 46%, var(--ember) 46% 54%, transparent 54%);
-}
-
-.pn-card.is-selected .pn-card__front {
+.pn-card.is-selected .pn-card__face {
   box-shadow:
-    inset 0 0 0 3px var(--brass),
+    inset 0 0 0 4px var(--brass),
     0 0 0 3px oklch(0.8 0.13 78 / 0.35);
 }
 
-.pn-card.is-marked .pn-card__front {
-  box-shadow:
-    inset 0 0 0 2px oklch(0.8 0.13 78 / 0.9),
-    0 3px 0 oklch(0.55 0.04 70 / 0.55),
-    0 8px 14px -8px oklch(0 0 0 / 0.7);
+.pn-card.is-marked .pn-card__face {
+  outline: 2.5px solid var(--brass);
+  outline-offset: 2px;
 }
 
 .pn-card__marks {
@@ -425,7 +469,7 @@
   font-size: 0.68rem;
   font-weight: 800;
   box-shadow: 0 0 0 2px var(--ink-0);
-  animation: pn-stamp 0.35s var(--spring);
+  animation: pn-stamp 0.3s var(--ease-out);
 }
 
 .pn-card__reveal {
@@ -441,7 +485,7 @@
   font-size: clamp(0.65rem, 0.5rem + 0.4vw, 0.8rem);
   font-weight: 800;
   box-shadow: 0 0 0 1.5px var(--brass);
-  animation: pn-stamp 0.35s var(--spring);
+  animation: pn-stamp 0.3s var(--ease-out);
 }
 
 .pn-card__reveal:hover {
@@ -452,8 +496,109 @@
 @keyframes pn-stamp {
   from {
     opacity: 0;
-    scale: 1.6;
+    scale: 1.5;
   }
+}
+
+/* ---------- Turn feedback ---------- */
+
+/* The whole table takes the active team's colour, so a glance says whose turn it is. */
+.pn {
+  --team-glow: var(--blue);
+  background: radial-gradient(90% 55% at 50% 0%, color-mix(in oklab, var(--team-glow) 28%, transparent), transparent 70%);
+}
+
+.pn[data-active='red'] {
+  --team-glow: var(--red);
+}
+
+.pn[data-phase='finished'] {
+  background: none;
+}
+
+.pn-pop {
+  position: fixed;
+  inset-block-start: 38%;
+  inset-inline: 0;
+  z-index: 30;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - 2rem);
+  margin-inline: auto;
+  padding: 1rem 2rem 1.2rem;
+  border-radius: 20px;
+  background: var(--team-pop);
+  color: oklch(0.99 0.01 80);
+  text-align: center;
+  box-shadow:
+    0 0 0 4px oklch(1 0 0 / 0.15),
+    0 30px 60px -20px oklch(0 0 0 / 0.85);
+  cursor: pointer;
+}
+
+.pn-pop--blue {
+  --team-pop: var(--blue);
+}
+
+.pn-pop--red {
+  --team-pop: var(--red);
+}
+
+.pn-pop__title,
+.pn-pop__clue {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  line-height: 1.2;
+}
+
+.pn-pop__kicker {
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.pn-pop__count {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.3em;
+  aspect-ratio: 1;
+  margin-inline-start: 0.3em;
+  border-radius: 50%;
+  background: oklch(0.99 0.01 80);
+  color: var(--team-pop);
+  font-family: var(--font-latin);
+  font-size: 0.6em;
+  font-weight: 900;
+  vertical-align: middle;
+}
+
+/* Guesses left as dots. */
+.pn-pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pn-pips span {
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px oklch(1 0 0 / 0.35);
+  transition:
+    background 0.3s,
+    scale 0.3s var(--ease-out);
+}
+
+.pn-pips span.is-on {
+  background: var(--team-glow);
+}
+
+.pn-pips span:not(.is-on) {
+  scale: 0.75;
+}
+
+.pn-pips--free {
+  color: var(--team-glow);
+  font-size: var(--step-1);
+  font-weight: 900;
 }
 
 /* ---------- Controls ---------- */
@@ -608,9 +753,6 @@
   display: none;
 }
 
-.tv .pn--screen .pn-card__word {
-  font-size: clamp(1rem, 0.4rem + 1.5vw, 2.4rem);
-}
 
 @media (max-width: 560px) {
   .pn {
@@ -618,13 +760,7 @@
     padding-inline: 0.5rem;
   }
 
-  .pn-card__word {
-    font-size: clamp(0.58rem, 0.3rem + 1.6vw, 0.85rem);
-  }
 
-  .pn--six .pn-card__word {
-    font-size: 0.55rem;
-  }
 
   .pn-card {
     aspect-ratio: 1 / 1;
@@ -632,15 +768,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pn-card.is-revealed .pn-card__flip {
-    transform: none;
-  }
-
-  .pn-card.is-revealed .pn-card__front {
-    visibility: hidden;
-  }
-
-  .pn-card.is-revealed .pn-card__back {
-    transform: none;
+  .pn-cover,
+  .pn-card {
+    animation: none;
   }
 }

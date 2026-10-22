@@ -7,7 +7,7 @@ import words from '../../games/passnames/words.json';
 
 const hash = (n: number) => n.toString(16).padStart(64, '0');
 const passnames = serverGames.passnames!;
-const content: GameContent = { words, pictures: [], questions: [], puzzles: [], roleArt: {}, cardBack: null };
+const content: GameContent = { words, pictures: [], agentPhotos: [], questions: [], puzzles: [], roleArt: {}, cardBack: null };
 let seed = 1;
 const rng = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
 

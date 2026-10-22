@@ -5,7 +5,7 @@ import type { Ctx, GameContent, Seat } from '../types';
 import { isGameError } from '../types';
 
 const seats: Seat[] = ['a', 'b', 'c'].map((id) => ({ id, name: id, team: null, role: null, portrait: null }));
-const content: GameContent = { words: [], pictures: [], questions: defaultQuestions, puzzles: [], roleArt: {}, cardBack: null };
+const content: GameContent = { words: [], pictures: [], agentPhotos: [], questions: defaultQuestions, puzzles: [], roleArt: {}, cardBack: null };
 const ctx = (now = 0): Ctx => {
   let s = 11;
   return { now, adminId: 'a', rng: () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646 };

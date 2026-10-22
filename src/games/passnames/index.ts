@@ -27,7 +27,7 @@ export type LogEntry = {
 };
 
 type Player = { id: string; name: string; team: Team; role: 'spy' | 'agent' };
-type Cell = { id: number; word: string | null; picture: AssetRef | null; color: Color; revealed: boolean; yellowOwner: Team | null };
+type Cell = { id: number; word: string | null; picture: AssetRef | null; cover: AssetRef | null; color: Color; revealed: boolean; yellowOwner: Team | null };
 type HandCard = { id: number; type: Exclude<CardType, 'luck'>; usableTurn: number };
 type TeamState = {
   target: number;
@@ -194,7 +194,7 @@ function consume(s: State, type: HandCard['type']) {
   log(s, 'useCard', { card: type }, s.active);
 }
 
-function setup(settings: Settings, seats: Seat[], content: { words: string[]; pictures: AssetRef[] }, ctx: Ctx): State {
+function setup(settings: Settings, seats: Seat[], content: { words: string[]; pictures: AssetRef[]; agentPhotos?: AssetRef[] }, ctx: Ctx): State {
   const { rng, now } = ctx;
   const players: Player[] = seats.map((p) => ({ id: p.id, name: p.name, team: p.team as Team, role: p.role as Player['role'] }));
   const expanded = settings.mode === 'expanded';
@@ -206,6 +206,7 @@ function setup(settings: Settings, seats: Seat[], content: { words: string[]; pi
   const words = [...new Map(content.words.map((w) => [normalizeWord(w), w.trim()])).values()];
   const pictures = settings.board === 'photos' ? shuffled(content.pictures, rng).slice(0, layout.length) : [];
   const picked = shuffled(words, rng).slice(0, layout.length - pictures.length);
+  const covers = shuffled(content.agentPhotos ?? [], rng);
   const faces = shuffled<{ word: string | null; picture: AssetRef | null }>(
     [...pictures.map((picture) => ({ word: null, picture })), ...picked.map((word) => ({ word, picture: null }))],
     rng,
@@ -223,7 +224,8 @@ function setup(settings: Settings, seats: Seat[], content: { words: string[]; pi
   const s: State = {
     settings: { ...settings, manualDraw: expanded && settings.manualDraw },
     players,
-    board: layout.map((color, i) => ({ id: i, ...faces[i]!, color, revealed: false, yellowOwner: null })),
+    // Words mode: each card gets a friend's photo for the agent card that covers it when revealed.
+    board: layout.map((color, i) => ({ id: i, ...faces[i]!, cover: covers.length && faces[i]!.word ? covers[i % covers.length]! : null, color, revealed: false, yellowOwner: null })),
     size: expanded ? 6 : 5,
     teams: { blue: teamState('blue'), red: teamState('red') },
     deck: expanded ? shuffled<CardType>(['second', 'second', 'scan', 'scan', 'swap', 'swap', 'luck', 'luck', 'luck', 'luck'], rng) : [],
@@ -452,6 +454,7 @@ export type CellView = {
   id: number;
   word: string | null;
   picture: AssetRef | null;
+  cover: AssetRef | null;
   revealed: boolean;
   yellowOwner: Team | null;
   color: Color | null;
@@ -495,6 +498,7 @@ function view(s: State, viewer: Viewer, ctx: { now: number; adminId: string }) {
       id: c.id,
       word: c.word,
       picture: c.picture,
+      cover: c.revealed || s.phase === 'finished' ? c.cover : null,
       revealed: c.revealed,
       yellowOwner: c.yellowOwner,
       color: (spy && s.phase !== 'deal') || c.revealed || s.phase === 'finished' ? c.color : null,

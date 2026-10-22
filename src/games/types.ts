@@ -33,6 +33,8 @@ export type Puzzle = { id: string; tiles: PuzzleTile[]; answer: string; hint?: s
 export type GameContent = {
   words: string[];
   pictures: AssetRef[];
+  /** Friends' photos shown on the agent cards that cover revealed words (words mode). */
+  agentPhotos: AssetRef[];
   questions: KalakQuestion[];
   puzzles: Puzzle[];
   roleArt: Record<string, AssetRef>;

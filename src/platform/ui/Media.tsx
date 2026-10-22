@@ -46,6 +46,8 @@ export function MediaImage({
       decoding="async"
       draggable={false}
       onLoad={() => setLoaded(true)}
+      // A missing file should vanish quietly, never show a broken-image icon.
+      onError={(e) => (e.currentTarget.style.visibility = 'hidden')}
       style={{
         ...style,
         objectFit: 'cover',

@@ -37,8 +37,11 @@ export const A = {
   wordsTitle: ['كلمات اللوحة', 'Board words'],
   wordsText: ['كلمة في كل سطر. لو ٣٦ كلمة أو أكثر وطفّيت الكلمات الجاهزة، بتنلعب كلماتكم بس.', 'One per line. With 36+ words and the built-in list off, only your words are used.'],
   includeDefaults: ['استخدم المحتوى الجاهز بعد', 'Also use the built-in content'],
-  photosTitle: ['بطاقات الصور', 'Photo cards'],
-  photosText: ['للوضع «صور الشلة». ارفع صور كثيرة مرة وحدة، تتقصّ وتتصغّر تلقائيًا.', 'For the “Our photos” mode. Upload many at once; they are cropped and shrunk automatically.'],
+  agentsTitle: ['صور العملاء (مود الكلمات)', 'Agent photos (words mode)'],
+  agentsText: ['لما تنكشف كلمة، تنحط فوقها بطاقة عميل فيها صورة واحد منكم بلون الفريق، مثل اللعبة الأصلية.', 'When a word is revealed it gets covered by an agent card with one of your photos in the team colour, like the original game.'],
+  agentsFallback: ['ما رفعت شي: بنستخدم صور الأعضاء.', 'None yet: friends’ portraits are used.'],
+  photosTitle: ['بطاقات الصور (مود الصور)', 'Photo cards (photos mode)'],
+  photosText: ['للوضع اللي اللوحة كلها صور بدل الكلمات. ارفع صور كثيرة مرة وحدة، تتقصّ وتتصغّر تلقائيًا.', 'For the mode where the board is photos instead of words. Upload many at once; they are cropped and shrunk automatically.'],
   addPhotos: ['ارفع صور', 'Upload photos'],
   photosCount: ['{n} صورة', '{n} photos'],
 

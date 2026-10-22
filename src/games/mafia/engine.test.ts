@@ -3,7 +3,7 @@ import { game, type State } from './index';
 import type { Ctx, GameContent, Seat } from '../types';
 import { isGameError } from '../types';
 
-const content: GameContent = { words: [], pictures: [], questions: [], puzzles: [], roleArt: {}, cardBack: null };
+const content: GameContent = { words: [], pictures: [], agentPhotos: [], questions: [], puzzles: [], roleArt: {}, cardBack: null };
 const seat = (id: string, role = 'player'): Seat => ({ id, name: id, team: null, role, portrait: null });
 const seats = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((id) => seat(id));
 const ctx = (now = 0, seed = 3): Ctx => {

@@ -9,7 +9,7 @@ const seats: Seat[] = [
   { id: 'f1', name: 'F1', team: 'falcons', role: 'player', portrait: null },
   { id: 'w1', name: 'W1', team: 'wolves', role: 'player', portrait: null },
 ];
-const content: GameContent = { words: [], pictures: [], questions: [], puzzles: defaultPuzzles, roleArt: {}, cardBack: null };
+const content: GameContent = { words: [], pictures: [], agentPhotos: [], questions: [], puzzles: defaultPuzzles, roleArt: {}, cardBack: null };
 const ctx = (): Ctx => {
   let s = 5;
   return { now: 0, adminId: 'h', rng: () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646 };
