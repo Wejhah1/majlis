@@ -1,0 +1,412 @@
+.home {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+}
+
+.sadu-band {
+  block-size: 10px;
+  background: var(--sadu) repeat-x center / auto 100%;
+  opacity: 0.9;
+}
+
+/* ---------- Top bar ---------- */
+
+.home__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--gutter);
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.wordmark > span:first-child {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--brass);
+}
+
+.wordmark__group {
+  color: var(--text-dim);
+  font-size: var(--step--1);
+  letter-spacing: 0.02em;
+}
+
+.lang-toggle {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: var(--step--1);
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.lang-toggle:hover {
+  color: var(--text);
+  border-color: var(--brass-deep);
+}
+
+/* ---------- Main layout ---------- */
+
+.home__main {
+  display: grid;
+  grid-template-columns: minmax(17rem, 0.75fr) minmax(0, 1.5fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+  padding: clamp(1rem, 4vw, 3rem) var(--gutter) 2rem;
+}
+
+.home__question {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  line-height: 1.15;
+  max-inline-size: 11ch;
+}
+
+:lang(en) .home__question {
+  font-family: var(--font-latin);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  max-inline-size: 13ch;
+}
+
+.home__lede {
+  margin-block-start: 1rem;
+  color: var(--text-dim);
+  max-inline-size: 34ch;
+}
+
+/* ---------- Join ---------- */
+
+.join {
+  margin-block-start: clamp(1.75rem, 4vw, 2.75rem);
+  padding-block-start: 1.25rem;
+  border-block-start: 1px solid var(--line-soft);
+  max-inline-size: 24rem;
+}
+
+.join__title {
+  font-weight: 600;
+}
+
+.join__label {
+  display: block;
+  margin-block: 0.15rem 0.5rem;
+  color: var(--text-faint);
+  font-size: var(--step--1);
+}
+
+.join__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.join__input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--ink-1);
+  font-family: var(--font-latin);
+  font-size: var(--step-1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.18em;
+  text-align: left;
+}
+
+.join__input::placeholder {
+  color: var(--text-faint);
+  opacity: 0.5;
+  font-weight: 400;
+}
+
+.join__input:focus-visible {
+  outline: none;
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px oklch(0.8 0.13 78 / 0.2);
+}
+
+.join__input[aria-invalid='true'] {
+  border-color: var(--ember);
+}
+
+.join__message {
+  min-block-size: 1.6em;
+  margin-block-start: 0.5rem;
+  color: var(--text-dim);
+  font-size: var(--step--1);
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+  padding: 0.7rem 1.25rem;
+  border: 0;
+  border-radius: var(--radius-control);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    transform 0.15s var(--ease-out),
+    background-color 0.2s;
+}
+
+.button--primary {
+  background: var(--brass);
+  color: var(--ink-0);
+  box-shadow: 0 -3px 0 var(--brass-deep) inset;
+}
+
+.button--primary:hover:not(:disabled) {
+  background: oklch(0.84 0.13 80);
+}
+
+.button--primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 -1px 0 var(--brass-deep) inset;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  background: var(--ink-2);
+  color: var(--text-faint);
+  box-shadow: none;
+}
+
+/* ---------- The hand of game cards ---------- */
+
+.home__table {
+  display: grid;
+  gap: 2.5rem;
+  justify-items: center;
+}
+
+.hand {
+  --dir: 1;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 2rem 0 0;
+  list-style: none;
+}
+
+[dir='rtl'] .hand {
+  --dir: -1;
+}
+
+.hand__slot {
+  --offset: calc(var(--i) - (var(--n) - 1) / 2);
+  position: relative;
+  margin-inline: calc(var(--card-w) * -0.12);
+  /* Individual transform properties compose with Motion's deal-in transform. */
+  rotate: calc(var(--offset) * 7deg * var(--dir));
+  translate: 0 calc(max(var(--offset), var(--offset) * -1) * 14px);
+  transition:
+    rotate 0.5s var(--spring),
+    translate 0.5s var(--spring);
+}
+
+.hand__slot:hover,
+.hand__slot:has([aria-pressed='true']) {
+  z-index: 2;
+}
+
+.hand__slot:has(:focus-visible) {
+  z-index: 3;
+}
+
+/* ---------- Game card face ---------- */
+
+.game-card__index {
+  position: absolute;
+  inset-block-start: 9%;
+  inset-inline-start: 11%;
+  font-family: var(--font-latin);
+  font-size: calc(var(--card-w) * 0.075);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--paper-ink);
+  opacity: 0.75;
+}
+
+.game-card__art {
+  position: absolute;
+  inset: 22% 18% 34%;
+  display: grid;
+  place-items: center;
+  color: var(--paper-ink);
+}
+
+.game-card__art svg {
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.game-card__name {
+  position: absolute;
+  inset-inline: 10%;
+  inset-block-end: 10%;
+  font-family: var(--font-display);
+  font-size: calc(var(--card-w) * 0.13);
+  line-height: 1.1;
+  text-align: center;
+  color: var(--paper-ink);
+}
+
+:lang(en) .game-card__name {
+  font-family: var(--font-latin);
+  font-weight: 800;
+  font-size: calc(var(--card-w) * 0.1);
+  letter-spacing: -0.01em;
+}
+
+.game-card--mafia {
+  background: oklch(0.25 0.02 40);
+}
+
+.game-card--mafia :is(.game-card__index, .game-card__art, .game-card__name) {
+  color: oklch(0.9 0.03 80);
+}
+
+.game-card--mafia .playing-card__face {
+  box-shadow: inset 0 0 0 calc(var(--card-w) * 0.035) oklch(0.25 0.02 40),
+    inset 0 0 0 calc(var(--card-w) * 0.035 + 1px) oklch(0.63 0.18 35 / 0.6);
+}
+
+/* Rubber stamp across unfinished games. */
+.game-card__stamp {
+  position: absolute;
+  inset-block-start: 7%;
+  inset-inline-end: 8%;
+  padding: 0.05em 0.5em;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  color: oklch(0.55 0.17 30 / 0.85);
+  font-weight: 800;
+  font-size: calc(var(--card-w) * 0.065);
+  letter-spacing: 0.04em;
+  rotate: 9deg;
+  mix-blend-mode: multiply;
+}
+
+[dir='rtl'] .game-card__stamp {
+  rotate: -9deg;
+}
+
+.game-card--mafia .game-card__stamp {
+  color: oklch(0.7 0.17 35 / 0.9);
+  mix-blend-mode: normal;
+}
+
+/* ---------- Selected game details ---------- */
+
+.details {
+  inline-size: min(100%, 30rem);
+  text-align: center;
+}
+
+.details__name {
+  font-size: var(--step-2);
+}
+
+.details__tagline {
+  margin-block: 0.5rem 1rem;
+  color: var(--text-dim);
+}
+
+.details__facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.25rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+  color: var(--text-faint);
+  font-size: var(--step--1);
+}
+
+.details__facts li + li::before {
+  content: '·';
+  margin-inline-end: 1.25rem;
+  margin-inline-start: -0.65rem;
+  color: var(--line);
+}
+
+.details__note {
+  margin-block-start: 0.6rem;
+  color: var(--text-faint);
+  font-size: var(--step--1);
+}
+
+/* ---------- Footer ---------- */
+
+.home__footer {
+  padding: 1rem var(--gutter) 1.5rem;
+  font-size: var(--step--1);
+}
+
+.home__footer a {
+  color: var(--text-faint);
+  text-underline-offset: 3px;
+}
+
+.home__footer a:hover {
+  color: var(--text-dim);
+}
+
+/* ---------- Phones: the fan becomes a swipeable row ---------- */
+
+@media (max-width: 760px) {
+  .home__main {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+  }
+
+  .home__table {
+    justify-items: stretch;
+    gap: 1.5rem;
+  }
+
+  .hand {
+    --card-w: 9.25rem;
+    justify-content: flex-start;
+    gap: 0.9rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 1.25rem var(--gutter) 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .hand__slot {
+    flex: none;
+    margin: 0;
+    rotate: none;
+    translate: none;
+    scroll-snap-align: start;
+  }
+
+  .details {
+    text-align: start;
+  }
+
+  .details__facts {
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "majlis",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/parties/*"]
+  }
+  // Phase 1 adds the Rooms Durable Object; Phase 3 adds the D1 database and R2 bucket.
+  // Group-specific data never lives here: it is stored in D1/R2 and edited from /admin.
+}
