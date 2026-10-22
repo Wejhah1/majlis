@@ -1,0 +1,429 @@
+.admin {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  inline-size: min(100%, 72rem);
+  margin-inline: auto;
+  padding: 1rem var(--gutter) 4rem;
+}
+
+.admin__nav {
+  position: sticky;
+  inset-block-start: 1rem;
+  align-self: start;
+  display: grid;
+  gap: 1rem;
+}
+
+.admin__title {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+}
+
+:lang(en) .admin__title {
+  font-family: var(--font-latin);
+  font-weight: 800;
+  font-size: var(--step-1);
+}
+
+.admin__nav ul {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin__nav button {
+  inline-size: 100%;
+  padding: 0.55rem 0.8rem;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-dim);
+  text-align: start;
+}
+
+.admin__nav button:hover {
+  background: var(--ink-1);
+  color: var(--text);
+}
+
+.admin__nav button[aria-current='page'] {
+  background: var(--ink-2);
+  color: var(--text);
+  box-shadow: inset 3px 0 0 var(--brass);
+}
+
+[dir='rtl'] .admin__nav button[aria-current='page'] {
+  box-shadow: inset -3px 0 0 var(--brass);
+}
+
+.admin__body {
+  display: grid;
+  align-content: start;
+  gap: 2.5rem;
+  min-inline-size: 0;
+}
+
+.admin-section {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admin-section__title {
+  font-size: var(--step-2);
+}
+
+.admin-section__text {
+  max-inline-size: 60ch;
+  margin-block-start: 0.35rem;
+}
+
+.admin-form {
+  display: grid;
+  gap: 1rem;
+  max-inline-size: 40rem;
+}
+
+.admin-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-inline .input {
+  flex: 1 1 14rem;
+  inline-size: auto;
+}
+
+.admin-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.admin-words {
+  min-block-size: 12rem;
+  font-family: var(--font-ui);
+}
+
+.admin-toggle {
+  justify-content: flex-start;
+  gap: 0.9rem;
+}
+
+.admin-toggle input {
+  order: -1;
+}
+
+/* Group colour */
+.swatches {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.swatches__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.swatch {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.15);
+  cursor: pointer;
+}
+
+.swatch[aria-pressed='true'] {
+  box-shadow:
+    0 0 0 2px var(--ink-0),
+    0 0 0 4px var(--text);
+}
+
+.swatch--none {
+  background:
+    linear-gradient(135deg, transparent 46%, var(--ember) 46% 54%, transparent 54%),
+    var(--brass);
+}
+
+.swatch--custom {
+  appearance: none;
+  background: conic-gradient(from 90deg, #d8a845, #c4512e, #b24a6b, #3a6ea5, #2f7d6d, #7a8c3a, #d8a845);
+}
+
+.swatch--custom::-webkit-color-swatch-wrapper,
+.swatch--custom::-webkit-color-swatch {
+  opacity: 0;
+}
+
+/* Roster */
+.roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roster__item {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem 0.6rem 0.75rem;
+  border-radius: 14px;
+  background: var(--ink-1);
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+.roster__photo {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--ink-2);
+}
+
+.roster__photo img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.roster__name {
+  font-weight: 700;
+}
+
+.roster__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.roster__actions .button {
+  min-block-size: 2.25rem;
+  padding-inline: 0.75rem;
+  font-size: var(--step--1);
+}
+
+/* Asset grids */
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.asset-grid li {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--ink-2);
+}
+
+.asset-grid img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.asset-grid__remove {
+  position: absolute;
+  inset-block-start: 0.3rem;
+  inset-inline-end: 0.3rem;
+  display: grid;
+  place-items: center;
+  inline-size: 1.9rem;
+  block-size: 1.9rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: oklch(0.15 0.01 60 / 0.75);
+  color: var(--paper);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+li:hover > .asset-grid__remove,
+.puzzle-tile:hover > .asset-grid__remove,
+.asset-grid__remove:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .asset-grid__remove {
+    opacity: 1;
+  }
+}
+
+/* Mafia role art */
+.role-art {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.role-art__item {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.role-art__card {
+  inline-size: 100%;
+  aspect-ratio: 5 / 7;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background: oklch(0.22 0.02 40);
+  box-shadow: inset 0 0 0 1px oklch(0.63 0.18 35 / 0.4);
+}
+
+.role-art__card img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.role-art__card--back {
+  background: var(--sadu) repeat center / 48px 16px, oklch(0.22 0.02 40);
+}
+
+.role-art__empty {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  color: oklch(0.9 0.03 80 / 0.5);
+}
+
+.role-art__name {
+  font-weight: 700;
+}
+
+/* Lists */
+.admin-list {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: var(--ink-1);
+}
+
+.admin-list__tiles {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Puzzle builder */
+.puzzle-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-block-size: 0.5rem;
+}
+
+.puzzle-tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 5rem;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+.puzzle-tile img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.puzzle-tile__text {
+  padding: 0.25rem;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.puzzle-tile--small {
+  inline-size: 2.6rem;
+  border-radius: 6px;
+}
+
+.puzzle-tile--small .puzzle-tile__text {
+  font-size: 1rem;
+}
+
+/* Cropper */
+.cropper {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.cropper__stage {
+  position: relative;
+  block-size: min(55dvh, 26rem);
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--ink-0);
+}
+
+.cropper__zoom {
+  inline-size: 100%;
+  accent-color: var(--brass);
+}
+
+@media (max-width: 760px) {
+  .admin {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin__nav {
+    position: static;
+  }
+
+  .admin__nav ul {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+  }
+
+  .admin__nav li {
+    flex: none;
+  }
+
+  .admin__nav button[aria-current='page'] {
+    box-shadow: inset 0 -2px 0 var(--brass);
+  }
+
+  .admin-two {
+    grid-template-columns: 1fr;
+  }
+}
