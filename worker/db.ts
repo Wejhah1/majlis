@@ -10,6 +10,7 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS assets (key TEXT PRIMARY KEY, widths TEXT NOT NULL, thumb TEXT NOT NULL, aspect REAL NOT NULL, bytes INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL)',
   'CREATE TABLE IF NOT EXISTS content (id TEXT PRIMARY KEY, game TEXT NOT NULL, kind TEXT NOT NULL, data TEXT NOT NULL, created_at INTEGER NOT NULL)',
   'CREATE INDEX IF NOT EXISTS content_game ON content (game, kind)',
+  'CREATE TABLE IF NOT EXISTS media (key TEXT PRIMARY KEY, type TEXT NOT NULL, data BLOB NOT NULL, created_at INTEGER NOT NULL)',
 ];
 
 let ready: Promise<void> | null = null;

@@ -4,6 +4,7 @@
 import { RoomError } from '../src/platform/room/core';
 import { db, getGroup, getRoster, getSetting, listContent, setSetting, type GroupSettings } from './db';
 import { errorResponse, noStore, readJSON } from './http';
+import { putMedia } from './media';
 import { rateLimit } from './rate-guard';
 
 const COOKIE = 'majlis_admin';
@@ -217,9 +218,7 @@ export async function handleAdmin(request: Request, env: Env, path: string): Pro
       if (!['image/webp', 'image/jpeg'].includes(type)) throw new RoomError('UPLOAD_TYPE', 415);
       const body = await request.arrayBuffer();
       if (body.byteLength > 800_000) throw new RoomError('TOO_LARGE', 413);
-      await env.MEDIA.put(`${key}-${width}`, body, {
-        httpMetadata: { contentType: type, cacheControl: 'public, max-age=31536000, immutable' },
-      });
+      await putMedia(env, `${key}-${width}`, body, type);
       return ok({ bytes: body.byteLength });
     }
     if (path === '/api/admin/content' && method === 'POST') {

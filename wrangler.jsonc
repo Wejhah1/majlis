@@ -8,10 +8,11 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*", "/parties/*", "/media/*"]
   },
-  // Group data never lives here: it is stored in D1/R2 and edited from /admin.
-  // D1 and R2 are created automatically on first deploy (no IDs to copy around).
+  // Group data never lives here: it is stored in D1 and edited from /admin.
+  // D1 is created automatically on first deploy (no IDs to copy around).
   "d1_databases": [{ "binding": "DB", "database_name": "majlis" }],
-  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "majlis-media" }],
+  // Optional: store photos in R2 instead of D1 (needs R2 enabled on your account):
+  // "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "majlis-media" }],
   "durable_objects": {
     "bindings": [
       { "name": "Rooms", "class_name": "RoomsServer" },

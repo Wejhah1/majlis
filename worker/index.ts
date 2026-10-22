@@ -5,6 +5,7 @@ import { RoomError, normalizeCode, randomCode, validCode } from '../src/platform
 import { handleAdmin } from './admin';
 import { getGroup, getRoster } from './db';
 import { errorResponse, noStore, readJSON, sameOrigin } from './http';
+import { serveMedia } from './media';
 import { rateLimit } from './rate-guard';
 
 export { RoomsServer } from './room-server';
@@ -45,21 +46,8 @@ async function handleRooms(request: Request, env: Env, path: string): Promise<Re
   }
 }
 
-async function handleMedia(request: Request, env: Env, path: string): Promise<Response> {
-  const key = path.slice('/media/'.length).replace(/\.(webp|jpg)$/, '');
-  if (!/^[a-f0-9]{16,64}-\d{2,4}$/.test(key)) return new Response('Not found', { status: 404 });
-  const object = await env.MEDIA.get(key);
-  if (!object) return new Response('Not found', { status: 404 });
-  const headers = new Headers();
-  object.writeHttpMetadata(headers);
-  headers.set('ETag', object.httpEtag);
-  headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-  if (request.headers.get('If-None-Match') === object.httpEtag) return new Response(null, { status: 304, headers });
-  return new Response(object.body, { headers });
-}
-
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
 
@@ -74,7 +62,7 @@ export default {
     }
 
     if (path.startsWith('/api/admin/')) return handleAdmin(request, env, path);
-    if (path.startsWith('/media/')) return handleMedia(request, env, path);
+    if (path.startsWith('/media/')) return serveMedia(request, env, ctx, path);
 
     try {
       if (path === '/api/health') return Response.json({ ok: true, games: games.map((g) => g.id) }, { headers: noStore });
