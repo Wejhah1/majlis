@@ -149,11 +149,15 @@ export class RoomsServer extends Server<Env> {
       if ((s.memberId || s.screen) && s.seenAt != null) deadlines.push(s.seenAt + PRESENCE_TTL);
     }
     const r = this.room!;
-    if (r.adminAway) deadlines.push(r.adminAway.since + ADMIN_GRACE);
+    // Only future moments need a wake-up. A past deadline that can't be acted on (e.g. the
+    // admin's grace ran out but nobody is online to take over) must not re-arm the alarm, or
+    // the room wakes every few ms and burns the Durable Objects free quota.
+    if (r.adminAway && r.adminAway.since + ADMIN_GRACE > now) deadlines.push(r.adminAway.since + ADMIN_GRACE);
     if (r.emptySince !== null) deadlines.push(r.emptySince + EMPTY_ROOM_TTL);
     const due = matchDeadline(r, game);
     if (due !== null) deadlines.push(due);
-    const deadline = deadlines.length ? Math.max(Math.min(...deadlines), now + 50) : null;
+    // Never wake more than once a second.
+    const deadline = deadlines.length ? Math.max(Math.min(...deadlines), now + 1000) : null;
     if (deadline !== this.scheduledAlarm) {
       if (deadline !== null) await this.ctx.storage.setAlarm(deadline);
       else await this.ctx.storage.deleteAlarm();
@@ -217,6 +221,8 @@ export class RoomsServer extends Server<Env> {
     const room = this.room;
     const game = this.game();
     if (!room?.match || !game?.bot) return;
+    // Bots only play while at least one real person is watching.
+    if (!this.online().length) return;
     const ctx = () => ({ now: Date.now(), adminId: this.room?.adminId ?? '' });
     for (const id of room.match.seatIds) {
       if (!room.members.find((m) => m.id === id)?.bot || this.botTimers.has(id)) continue;
