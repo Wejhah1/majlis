@@ -1,0 +1,278 @@
+/* فكّها: a TV game-show set. Stage lights on ink, giant tiles, team colours everywhere. */
+.pz {
+  position: relative;
+  flex: 1;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 1.25rem;
+  padding: 1rem var(--gutter) 3rem;
+  overflow: hidden;
+  background:
+    conic-gradient(from 200deg at 50% -10%, transparent 0 40deg, oklch(0.8 0.13 78 / 0.07) 50deg, transparent 60deg 300deg, oklch(0.8 0.13 78 / 0.07) 310deg, transparent 320deg),
+    radial-gradient(60% 40% at 50% 100%, oklch(0.45 0.1 60 / 0.25), transparent 70%),
+    var(--ink-0);
+}
+
+.pz__head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  inline-size: min(100%, 60rem);
+}
+
+.pz__points {
+  margin-inline-start: auto;
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  background: oklch(0.8 0.13 78 / 0.15);
+  color: var(--brass);
+  font-weight: 800;
+}
+
+/* ---------- Scores ---------- */
+
+.pz-scores {
+  display: flex;
+  gap: 1rem;
+  inline-size: min(100%, 60rem);
+}
+
+.pz-score {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--team) 22%, var(--ink-1));
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--team) 60%, transparent);
+}
+
+.pz-score[data-locked] {
+  opacity: 0.45;
+}
+
+.pz-score__name {
+  font-weight: 800;
+  font-size: var(--step-1);
+}
+
+.pz-score__num {
+  font-family: var(--font-latin);
+  font-size: var(--step-3);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Tiles ---------- */
+
+.pz-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.pz-tile-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pz-plus {
+  font-family: var(--font-latin);
+  font-size: var(--step-2);
+  font-weight: 900;
+  color: var(--brass);
+}
+
+.pz-tile {
+  display: grid;
+  place-items: center;
+  inline-size: clamp(5.5rem, 24vw, 9rem);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow:
+    0 0 0 4px oklch(1 0 0 / 0.08),
+    0 24px 40px -20px oklch(0 0 0 / 0.9);
+}
+
+.pz-tile img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.pz-tile__text {
+  padding: 0.4rem;
+  font-size: clamp(2.6rem, 9vw, 4.5rem);
+  line-height: 1;
+  text-align: center;
+}
+
+.pz-tiles--big .pz-tile {
+  inline-size: clamp(9rem, 22vw, 22rem);
+  border-radius: 24px;
+}
+
+.pz-tiles--big .pz-tile__text {
+  font-size: clamp(4rem, 9vw, 10rem);
+}
+
+.pz-tiles--big .pz-plus {
+  font-size: clamp(2.5rem, 4vw, 5rem);
+}
+
+/* ---------- Status ---------- */
+
+.pz__status {
+  min-block-size: 5rem;
+  display: grid;
+  place-items: center;
+}
+
+.pz-answer {
+  padding: 0.5rem 1.5rem;
+  border-radius: 14px;
+  background: var(--brass);
+  color: var(--ink-0);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  line-height: 1.2;
+  box-shadow: 0 0 60px oklch(0.8 0.15 78 / 0.45);
+}
+
+.pz-answer--small {
+  font-size: var(--step-2);
+}
+
+.pz-buzz {
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  background: var(--team, var(--brass));
+  color: oklch(0.99 0.01 80);
+  font-size: var(--step-2);
+  font-weight: 800;
+  box-shadow: 0 0 50px color-mix(in oklab, var(--team, var(--brass)) 60%, transparent);
+}
+
+.pz-buzz--small {
+  font-size: var(--step-0);
+}
+
+.pz-hint {
+  color: var(--text-dim);
+  font-size: var(--step-1);
+}
+
+.pz-burst {
+  position: absolute;
+  inset-block-start: 45%;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  z-index: 5;
+  color: var(--team);
+  font-family: var(--font-latin);
+  font-size: clamp(5rem, 14vw, 14rem);
+  font-weight: 900;
+  text-shadow:
+    0 0 40px color-mix(in oklab, var(--team) 70%, transparent),
+    0 8px 0 oklch(0 0 0 / 0.4);
+  pointer-events: none;
+}
+
+[dir='rtl'] .pz-burst {
+  translate: 50% 0;
+}
+
+/* ---------- Host phone ---------- */
+
+.pz-host-answer {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 14px;
+  background: var(--ink-1);
+  box-shadow: inset 0 0 0 1px var(--brass-deep);
+}
+
+.pz-host-answer strong {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+  color: var(--brass);
+}
+
+.pz-controls {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  inline-size: min(100%, 32rem);
+}
+
+.pz-controls__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.pz-team-button {
+  box-shadow: inset 0 0 0 2px var(--team);
+}
+
+.pz-adjust summary {
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: var(--step--1);
+}
+
+/* ---------- Player buzzer ---------- */
+
+.pz-buzzer {
+  inline-size: min(70vw, 16rem);
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--team) 70%, white), var(--team) 60%);
+  color: oklch(0.99 0.01 80);
+  font-size: var(--step-3);
+  font-weight: 900;
+  box-shadow:
+    0 12px 0 color-mix(in oklab, var(--team) 60%, black),
+    0 30px 50px -10px oklch(0 0 0 / 0.8),
+    inset 0 -6px 20px oklch(0 0 0 / 0.2);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pz-buzzer:active {
+  translate: 0 8px;
+  box-shadow:
+    0 4px 0 color-mix(in oklab, var(--team) 60%, black),
+    0 16px 30px -10px oklch(0 0 0 / 0.8);
+}
+
+/* ---------- Final ---------- */
+
+.pz--final {
+  align-content: center;
+}
+
+.pz-final {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  color: var(--team);
+  text-shadow: 0 0 60px color-mix(in oklab, var(--team) 60%, transparent);
+}
+
+.tv .pz-score__num {
+  font-size: clamp(3rem, 6vw, 7rem);
+}

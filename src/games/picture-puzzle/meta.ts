@@ -11,7 +11,10 @@ export const meta: GameMeta = {
   surfaces: ['screen', 'host', 'phone'],
   status: 'ready',
   accent: 'oklch(0.72 0.15 55)',
-  settingFields: [],
+  settingFields: [
+    { id: 'rounds', kind: 'number', label: { ar: 'عدد الألغاز', en: 'Puzzles' }, min: 1, max: 50 },
+    { id: 'points', kind: 'number', label: { ar: 'نقاط اللغز', en: 'Points per puzzle' }, min: 1, max: 100, unit: { ar: 'التلميح ينصّفها', en: 'a hint halves it' } },
+  ],
   lobby: {
     teams: [
       { id: 'falcons', name: { ar: 'الصقور', en: 'Falcons' }, color: 'oklch(0.8 0.13 78)' },
